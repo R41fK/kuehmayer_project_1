@@ -1,12 +1,15 @@
 #pragma once
 
-#include <queue>
+#include <vector>
+
+#include "Elevator.h"
 
 class Coordinator
 {
 private:
-    std::queue<int> floor_queue{};
+    std::vector<int> floor_queue{};
+    std::vector<Elevator> elevators{};
 public:
-    Coordinator(){};
+    Coordinator(std::vector<Elevator> &elevators): elevators{elevators} {};
     void operator()();
 };

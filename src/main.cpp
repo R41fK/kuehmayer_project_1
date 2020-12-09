@@ -7,6 +7,7 @@
 #include "Floor.h"
 #include "Coordinator.h"
 #include "Elevator.h"
+#include "MessageQueue.h"
 
 using namespace std;
 using namespace rang;
@@ -39,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     float travel_time{3.0};
     unsigned int floor_number{3};
-    unsigned int elevators{1};
+    unsigned int number_of_elevators{1};
 
     app.add_option("-s, --seconds-between-floor_number"
                   , travel_time
@@ -52,7 +53,7 @@ int main(int argc, char* argv[]) {
                   , true)->check(validate_int);
 
     app.add_option("-e, --elevators"
-                   ,elevators
+                   ,number_of_elevators
                    ,"Number of elevators"
                    , true)->check(validate_int);
 
@@ -60,7 +61,8 @@ int main(int argc, char* argv[]) {
 
     vector<Floor> floors{};
     vector<thread> thread_pool{};
-
+    vector<Elevator> elevators{};
+    MessageQueue message_queue{};
 
     for (unsigned int i=0; i < floor_number; i++) {
         floors.push_back(Floor{});
@@ -68,13 +70,12 @@ int main(int argc, char* argv[]) {
         thread_pool.push_back(move(t));
     }
 
-    thread t{Coordinator{}};
-    thread_pool.push_back(move(t));
-
-    for (unsigned int i=0; i < elevators; i++) {
-        thread t{Elevator{}};
-        thread_pool.push_back(move(t));
+    for (unsigned int i=0; i < number_of_elevators; i++) {
+        elevators.push_back({1, travel_time});
     }
+
+    thread t{Coordinator{elevators}};
+    thread_pool.push_back(move(t));
 
     for (unsigned int i=0; i < thread_pool.size(); i++) {
         thread_pool[i].join();

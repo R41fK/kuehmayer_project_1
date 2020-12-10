@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 
+#include "spdlog/spdlog.h"
 #include "Elevator.h"
 
 using namespace std;
@@ -23,7 +24,7 @@ void Elevator::operator()(){
         
         Message message{this->message_queue->pop(this->name + to_string(this->id))};
         
-        cout << this->name + to_string(this->id) + ": " <<  message.get_command() << endl;
+        spdlog::info("Floor " + to_string( message.get_floor()) + " button pressed in elevator " + to_string(this->id));
         cout << ">>> " << flush;
 
         Message send{"Coordinator", message.get_command(), message.get_floor(), message.get_elevator_id()};

@@ -65,6 +65,21 @@ int main(int argc, char* argv[]) {
     vector<Elevator> elevators{};
     MessageQueue* message_queue = new MessageQueue();
 
+    cout << endl;
+    cout << "***********************************************************************************************************************" << endl;
+    cout << rang::fg::green
+         << rang::style::bold  << "Started elevator_control with " 
+         << rang::fg::yellow   << floor_number << " Floors " 
+         << rang::fg::green    << "and "
+         << rang::fg::yellow   << number_of_elevators << " Elevator(s)"
+         << rang::fg::green    << ". A Elevator " 
+         << rang::fg::yellow   << "travels " << travel_time << "s" 
+         << rang::fg::green    << " from one floor to the next one."
+         << rang::style::reset 
+         << rang::fg::reset << endl;
+    cout << "***********************************************************************************************************************" << endl;
+    cout << endl;
+
 
     for (unsigned int i=1; i <= floor_number; i++) {
         floors.push_back(Floor{i, message_queue});

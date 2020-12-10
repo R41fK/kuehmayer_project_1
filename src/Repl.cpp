@@ -3,15 +3,19 @@
 #include <string>
 
 #include "peglib.h"
+#include "spdlog/spdlog.h"
 #include "Repl.h"
 
 using namespace std;
 using namespace peg;
 
 void Repl::show_help(){
-    cout << ">>> Commands:" << endl;
-    cout << ">>>   CALL <floor_number>                    to simulate a button click in a floor, to call a elevator" << endl;
-    cout << ">>>   MOVE <floor_number> <elevator_number>  to simulate a button click in a certain elevator, to move to a certain floor" << endl;
+    cout << ">>> " << flush;
+    spdlog::info("Commands:");
+    cout << ">>> " << flush;
+    spdlog::info("  CALL <floor_number>                    to simulate a button click in a floor, to call a elevator");
+    cout << ">>> " << flush;
+    spdlog::info("  MOVE <floor_number> <elevator_number>  to simulate a button click in a certain elevator, to move to a certain floor");
 }
 
 
@@ -21,7 +25,8 @@ void Repl::call(string number) {
     
         this->message_queue->push(message);
     } else {
-        cout << ">>> There are only " << this->floor_number << " Floors! Your input: " + number << endl;
+        cout << ">>> " << flush;
+        spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + number);
     }
 
 }
@@ -33,14 +38,19 @@ void Repl::move(string floor_number, string elevator_number) {
     
         this->message_queue->push(message);
     }  else {
-        cout << ">>> There are only " << this->floor_number << " Floors! Your input: " + floor_number << "!" << endl;
-        cout << ">>> There are only " << this->elevator_number << " Elevators! Your input: " + elevator_number << "!" << endl;
+        cout << ">>> " << flush;
+        spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + floor_number + "!");
+        cout << ">>> " << flush;
+        spdlog::warn("There are only " + to_string(this->elevator_number) + " Elevators! Your input: " + elevator_number +"!");
     }
 }
 
 void Repl::operator()() {
 
-    cout << ">>> Type help to get a list of commands" << endl;
+    spdlog::set_pattern("[%^%l%$] %v");
+
+    cout << ">>> " << flush;
+    spdlog::info("Type help to get a list of commands");
 
     parser parser(R"(
         KEYWORDI    <- 'help' / 'call' Number / 'move' Number Number
@@ -52,7 +62,7 @@ void Repl::operator()() {
 
         string input{};
 
-        cout << ">>> ";
+        cout << ">>> " << flush;
         getline(cin, input);
 
 
@@ -79,7 +89,8 @@ void Repl::operator()() {
 
             }
         } else {
-            cout << ">>> No Command: " << input << endl;
+            cout << ">>> " << flush;
+            spdlog::warn("No Command: " + input);
             show_help();
         }
 

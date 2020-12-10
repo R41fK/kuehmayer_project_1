@@ -1,5 +1,7 @@
 #include <iostream>
 
+
+#include "spdlog/spdlog.h"
 #include "Coordinator.h"
 
 using namespace std;
@@ -10,7 +12,7 @@ void Coordinator::operator()() {
         
         Message message{this->message_queue->pop(this->name)};
         
-        cout << this->name + ": " <<  message.get_command() << endl;
+        spdlog::info(this->name + ": " +  message.get_command());
         cout << ">>> " << flush;
 
         

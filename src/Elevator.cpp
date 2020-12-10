@@ -1,6 +1,7 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <stdlib.h>
 
 #include "spdlog/spdlog.h"
 #include "Elevator.h"
@@ -9,9 +10,15 @@ using namespace std;
 
 
 void Elevator::move_to(unsigned int floor){
-    float travel_time{(this->current_floor-floor) * this->travel_time};
+    int floor_difference{abs((int)this->current_floor-(int)floor)};
+
+    float travel_time{floor_difference * this->travel_time};
+
     this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
     this->current_floor = floor;
+
+    spdlog::info("Elevator " + to_string(this->id) + " is now in Floor " + to_string(floor));
+    cout << ">>> " << flush;
 }
 
 unsigned int Elevator::get_current_floor(){

@@ -14,7 +14,7 @@ void MessageQueue::push(Message message){
 Message MessageQueue::pop(string message){
     unique_lock<mutex> ul{this->m};
     empty.wait(ul, [this, message]{return this->message_queue.size() 
-                                  || this->message_queue.front().get_message() != message
+                                   && this->message_queue.front().get_message() == message
                                  ;});
                             
     Message return_message = this->message_queue.front();

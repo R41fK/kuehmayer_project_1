@@ -8,6 +8,7 @@
 #include "Coordinator.h"
 #include "Elevator.h"
 #include "MessageQueue.h"
+#include "Repl.h"
 
 using namespace std;
 using namespace rang;
@@ -62,23 +63,33 @@ int main(int argc, char* argv[]) {
     vector<Floor> floors{};
     vector<thread> thread_pool{};
     vector<Elevator> elevators{};
-    MessageQueue message_queue{};
+    MessageQueue* message_queue = new MessageQueue();
 
-    for (unsigned int i=0; i < floor_number; i++) {
-        floors.push_back(Floor{});
+
+    for (unsigned int i=1; i <= floor_number; i++) {
+        floors.push_back(Floor{i, message_queue});
         thread t{floors.back()};
         thread_pool.push_back(move(t));
     }
 
-    for (unsigned int i=0; i < number_of_elevators; i++) {
-        elevators.push_back({1, travel_time});
+
+    for (unsigned int i=1; i <= number_of_elevators; i++) {
+        elevators.push_back(Elevator{1, travel_time, message_queue});
+        thread t{elevators.back()};
+        thread_pool.push_back(move(t));
     }
 
-    thread t{Coordinator{elevators}};
-    thread_pool.push_back(move(t));
+
+    thread tc{Coordinator{elevators, message_queue}};
+    thread_pool.push_back(move(tc));
+
+    thread tr{Repl{message_queue, floor_number, number_of_elevators}};
+    thread_pool.push_back(move(tr));
+
 
     for (unsigned int i=0; i < thread_pool.size(); i++) {
         thread_pool[i].join();
     }
 
+    message_queue->~MessageQueue();
 }

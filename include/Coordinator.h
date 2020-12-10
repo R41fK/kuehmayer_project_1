@@ -3,13 +3,20 @@
 #include <vector>
 
 #include "Elevator.h"
+#include "MessageQueue.h"
 
 class Coordinator
 {
 private:
-    std::vector<int> floor_queue{};
     std::vector<Elevator> elevators{};
+    MessageQueue* message_queue;
+    std::string name{"Coordinator"};
+
 public:
-    Coordinator(std::vector<Elevator> &elevators): elevators{elevators} {};
+    Coordinator(std::vector<Elevator>& elevators, MessageQueue* message_queue): 
+    elevators{elevators}, 
+    message_queue{message_queue}
+    {};
+
     void operator()();
 };

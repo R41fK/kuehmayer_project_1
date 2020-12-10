@@ -17,6 +17,8 @@ add_global_arguments('-I' + get_option('cli11_include_dir'), language : 'cpp')
 
 add_global_arguments('-I' + get_option('rang_include_dir'), language : 'cpp')
 
+add_global_arguments('-I' + get_option('peglib_include_dir'), language : 'cpp')
+
 # spdlog: https://github.com/gabime/spdlog
 #add_global_arguments('-I' + get_option('spdlog_include_dir'), language : 'cpp')
 
@@ -41,7 +43,7 @@ add_global_arguments('-I' + get_option('rang_include_dir'), language : 'cpp')
 # subdir('SUBDIR1')
 
 inc_dir = include_directories('include')
-src = ['src/main.cpp', 'src/Coordinator.cpp', 'src/Floor.cpp', 'src/Elevator.cpp', 'src/Message.cpp', 'src/MessageQueue.cpp']
+src = ['src/main.cpp', 'src/Coordinator.cpp', 'src/Floor.cpp', 'src/Elevator.cpp', 'src/Message.cpp', 'src/MessageQueue.cpp', 'src/Repl.cpp']
 #protobuf: src = ['src/main.cpp', generated]
 
 executable('elevator_control',

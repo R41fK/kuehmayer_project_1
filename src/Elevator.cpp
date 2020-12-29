@@ -10,27 +10,33 @@
 using namespace std;
 
 
-void Elevator::move_to(unsigned int floor){
+void Elevator::move_to(unsigned int floor) {
+    this->mooving = true;
     int floor_difference{abs((int)this->current_floor-(int)floor)};
 
     float travel_time{floor_difference * this->travel_time};
+
 
     this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
     this->current_floor = floor;
 
     spdlog::info("Elevator " + to_string(this->id) + " is now on Floor " + to_string(floor));
+    this->mooving = false;
 }
 
-unsigned int Elevator::get_current_floor(){
+unsigned int Elevator::get_current_floor(){ 
     return this->current_floor;
 }
 
+bool Elevator::is_mooving() {
+    return this->mooving;
+}
 
-void Elevator::push(Message m){
+void Elevator::push(Message m) {
     this->message_queue->push(m);
 }
 
-void Elevator::operator()(){
+void Elevator::operator()() {
     future<void> send;
     while (1) {
         

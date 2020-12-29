@@ -9,6 +9,7 @@ private:
     std::string name{"Elevator"};
     unsigned int id{};
     unsigned int current_floor{0};
+    bool mooving{false};
     float travel_time{3.0};
     MessageQueue* message_queue;
     MessageQueue* coordinator_queue;
@@ -23,6 +24,7 @@ public:
 
     void move_to(unsigned int floor);
     unsigned int get_current_floor();
+    bool is_mooving();
     void operator()();
     void push(Message message);
 

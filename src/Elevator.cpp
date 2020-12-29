@@ -11,25 +11,61 @@ using namespace std;
 
 
 void Elevator::move_to(unsigned int floor) {
-    this->mooving = true;
-    int floor_difference{abs((int)this->current_floor-(int)floor)};
-
-    float travel_time{floor_difference * this->travel_time};
-
-
-    this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
-    this->current_floor = floor;
-
-    spdlog::info("Elevator " + to_string(this->id) + " is now on Floor " + to_string(floor));
-    this->mooving = false;
+    if (floor > this->current_floor) {
+        this->next_floors->insert_l(floor);
+    } else {
+        this->next_floors->insert_u(floor);
+    }
 }
 
-unsigned int Elevator::get_current_floor(){ 
+void Elevator::move(){
+    unsigned int next{};
+
+    cout << "started" << endl;
+
+    while (1) {
+        if (next == 0) {
+            this->moving = false;
+            next = this->next_floors->get();
+            this->moving = true;
+
+        } else if (this->current_floor == next) {
+            spdlog::info("Elevator " + to_string(this->id) + " is now on Floor " + to_string(next));
+            this->next_floors->erase(next);
+            
+            this_thread::sleep_for(chrono::seconds(1));
+
+            if (!this->next_floors->empty()) {
+                next = this->next_floors->front();
+            } else {
+                this->moving = false;
+                next = 0;
+            }
+
+        } else {
+
+            if (next != this->next_floors->front()) {
+                next = this->next_floors->front();
+            }
+
+            this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
+
+            if (this->current_floor > next) {
+                this->current_floor--;
+            } else {
+                this->current_floor++;
+            }        
+        }
+    }
+}
+
+
+unsigned int Elevator::get_current_floor() { 
     return this->current_floor;
 }
 
-bool Elevator::is_mooving() {
-    return this->mooving;
+bool Elevator::is_moving() {
+    return this->moving;
 }
 
 void Elevator::push(Message m) {
@@ -38,6 +74,11 @@ void Elevator::push(Message m) {
 
 void Elevator::operator()() {
     future<void> send;
+
+    future<void> move = async(launch::async, [&](){
+        this->move();
+    });
+
     while (1) {
         
         Message message{this->message_queue->pop()};

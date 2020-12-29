@@ -9,7 +9,7 @@
 class Coordinator
 {
 private:
-    std::vector<Elevator> elevators{};
+    std::vector<Elevator>& elevators;
     MessageQueue* message_queue;
     std::string name{"Coordinator"};
 

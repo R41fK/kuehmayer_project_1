@@ -15,7 +15,7 @@ unsigned int closest_elevator_not_mooving(unsigned int floor, vector<Elevator> e
     
     for (unsigned int i{0}; i < elevators.size(); i++) {
         diff = max(elevators[i].get_current_floor(), floor) - min(elevators[i].get_current_floor(), floor);
-        if (diff < diff_closest_floor && !elevators[i].is_mooving()) {
+        if (diff < diff_closest_floor && !elevators[i].is_moving()) {
             diff_closest_floor = diff;
             closest_elevator = i;
             

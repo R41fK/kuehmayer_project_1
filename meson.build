@@ -43,7 +43,7 @@ add_global_arguments('-I' + get_option('spdlog_include_dir'), language : 'cpp')
 # subdir('SUBDIR1')
 
 inc_dir = include_directories('include')
-src = ['src/main.cpp', 'src/Coordinator.cpp', 'src/Floor.cpp', 'src/Elevator.cpp', 'src/Message.cpp', 'src/MessageQueue.cpp', 'src/Repl.cpp']
+src = ['src/main.cpp', 'src/Coordinator.cpp', 'src/Floor.cpp', 'src/Elevator.cpp', 'src/Message.cpp', 'src/MessageQueue.cpp', 'src/Repl.cpp', 'src/NextFloor_Queue.cpp']
 #protobuf: src = ['src/main.cpp', generated]
 
 executable('elevator_control',

@@ -20,7 +20,7 @@ void Repl::call(string number) {
     if (unsigned (stoi(number)) <= this->floor_number) {
         Message message{"Floor" + number, "call", unsigned (stoi(number)), 0};
     
-        this->floors[stoi(number) +1].push(message);
+        this->floors[stoi(number) - 1].push(message);
     } else {
         spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + number);
     }
@@ -31,7 +31,7 @@ void Repl::move(string floor_number, string elevator_number) {
     if (unsigned (stoi(floor_number)) <= this->floor_number && unsigned (stoi(elevator_number)) <= this->elevator_number) {
         Message message{"Elevator" + elevator_number, "move", unsigned (stoi(floor_number)), unsigned (stoi(elevator_number))};
     
-        this->elevators[stoi(elevator_number) +1].push(message);
+        this->elevators[stoi(elevator_number) - 1].push(message);
     }  else {
         spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + floor_number + "!");
         spdlog::warn("There are only " + to_string(this->elevator_number) + " Elevators! Your input: " + elevator_number +"!");
@@ -50,10 +50,9 @@ void Repl::operator()() {
         %whitespace <- [ \t]*
     )");
 
+    string input{};
+
      while (1) {
-
-        string input{};
-
         
         getline(cin, input);
 

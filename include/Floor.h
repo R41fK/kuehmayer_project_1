@@ -22,6 +22,8 @@ public:
 
     void push(Message message);
 
+    std::string test{"Floor"};
+
     // ~Floor(){
     //     delete message_queue;
     // }

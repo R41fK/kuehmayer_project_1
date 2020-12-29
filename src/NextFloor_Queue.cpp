@@ -11,6 +11,9 @@ unsigned int NextFloor_Queue::get() {
 }
 
 unsigned int NextFloor_Queue::front() {
+    if (this->next_floors.empty()) {
+        return 0;
+    }
     return this->next_floors.front();
 }
 
@@ -18,13 +21,23 @@ void NextFloor_Queue::erase(unsigned int pos) {
     this->next_floors.erase(find(this->next_floors.begin(), this->next_floors.end(), pos));
 }
 
-void NextFloor_Queue::insert_l(unsigned int floor){
-    this->next_floors.insert(lower_bound(this->next_floors.begin(), this->next_floors.end(), floor), floor);
+void NextFloor_Queue::insert_first(unsigned int floor){
+    this->next_floors.insert(this->next_floors.begin(), floor);
     this->con_empty.notify_one();
 }
 
-void NextFloor_Queue::insert_u(unsigned int floor){
-    this->next_floors.insert(upper_bound(this->next_floors.begin(), this->next_floors.end(), floor), floor);
+void NextFloor_Queue::insert(unsigned int floor){
+    for (unsigned int i{1}; i < this->next_floors.size(); i++) {
+        if ((this->next_floors[i-1] > floor && this->next_floors[i] <= floor)
+        || (this->next_floors[i-1] < floor && this->next_floors[i] >= floor)
+        ){
+            this->next_floors.insert(this->next_floors.begin() + i, floor);
+            this->con_empty.notify_one();
+            return;
+        }
+    }
+
+    this->next_floors.push_back(floor);
     this->con_empty.notify_one();
 }
 

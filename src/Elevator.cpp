@@ -11,51 +11,49 @@ using namespace std;
 
 
 void Elevator::move_to(unsigned int floor) {
-    if (floor > this->current_floor) {
-        this->next_floors->insert_l(floor);
-    } else {
-        this->next_floors->insert_u(floor);
-    }
+    if ((this->next_floors->front() >= floor && this->current_floor < floor)
+     || (this->next_floors->front() <= floor && this->current_floor > floor)){
+        this->next_floors->insert_first(floor);
+     } else {
+        this->next_floors->insert(floor);
+     }
 }
 
 void Elevator::move(){
-    unsigned int next{};
-
-    cout << "started" << endl;
+    unsigned int next{1};
 
     while (1) {
-        if (next == 0) {
-            this->moving = false;
-            next = this->next_floors->get();
-            this->moving = true;
-
-        } else if (this->current_floor == next) {
+    
+        if (this->current_floor == next) {
             spdlog::info("Elevator " + to_string(this->id) + " is now on Floor " + to_string(next));
-            this->next_floors->erase(next);
             
+        
             this_thread::sleep_for(chrono::seconds(1));
 
-            if (!this->next_floors->empty()) {
-                next = this->next_floors->front();
-            } else {
+            if (this->next_floors->empty()) {
                 this->moving = false;
-                next = 0;
-            }
-
-        } else {
-
-            if (next != this->next_floors->front()) {
-                next = this->next_floors->front();
-            }
-
-            this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
-
-            if (this->current_floor > next) {
-                this->current_floor--;
             } else {
-                this->current_floor++;
-            }        
+                this->next_floors->erase(next);
+            }
+
+            next = this->next_floors->get();
+            this->moving = true;
         }
+
+        if (next != this->next_floors->front()) {
+            next = this->next_floors->get();
+            this->moving = true;
+        }
+
+        if (this->current_floor > next) {
+            this->current_floor--;
+        } else if (this->current_floor < next) {
+            this->current_floor++;
+        }       
+
+        this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
+
+        cout << this->test << "e" << endl;
     }
 }
 

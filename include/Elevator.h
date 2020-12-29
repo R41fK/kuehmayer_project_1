@@ -12,7 +12,7 @@ class Elevator
 private:
     std::string name{"Elevator"};
     unsigned int id{};
-    unsigned int current_floor{0};
+    unsigned int current_floor{1};
     bool moving{false};
     float travel_time{3.0};
     MessageQueue* message_queue;
@@ -35,6 +35,8 @@ public:
     bool is_moving();
     void operator()();
     void push(Message message);
+
+    std::string test{"Elevator"};
 
     // ~Elevator(){
     //     delete message_queue;

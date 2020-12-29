@@ -19,7 +19,8 @@ void Repl::show_help(){
 void Repl::call(string number) {
     if (unsigned (stoi(number)) <= this->floor_number) {
         Message message{"Floor" + number, "call", unsigned (stoi(number)), 0};
-    
+        cout << this->floors[stoi(number) - 1].test << " r" << endl;
+
         this->floors[stoi(number) - 1].push(message);
     } else {
         spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + number);
@@ -31,6 +32,7 @@ void Repl::move(string floor_number, string elevator_number) {
     if (unsigned (stoi(floor_number)) <= this->floor_number && unsigned (stoi(elevator_number)) <= this->elevator_number) {
         Message message{"Elevator" + elevator_number, "move", unsigned (stoi(floor_number)), unsigned (stoi(elevator_number))};
     
+        cout << this->elevators[stoi(elevator_number) - 1].test << " r" << endl;
         this->elevators[stoi(elevator_number) - 1].push(message);
     }  else {
         spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + floor_number + "!");
@@ -39,8 +41,6 @@ void Repl::move(string floor_number, string elevator_number) {
 }
 
 void Repl::operator()() {
-
-    spdlog::set_pattern("[%^%l%$] %v");
 
     spdlog::info("Type help to get a list of commands");
 

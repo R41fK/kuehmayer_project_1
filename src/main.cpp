@@ -4,6 +4,7 @@
 
 #include "CLI11.hpp"
 #include "rang.hpp"
+#include "spdlog/spdlog.h"
 #include "Floor.h"
 #include "Coordinator.h"
 #include "Elevator.h"
@@ -79,22 +80,23 @@ int main(int argc, char* argv[]) {
     cout << "***********************************************************************************************************************" << endl;
     cout << endl;
 
+    spdlog::set_pattern("[%^%l%$] %v");
 
     for (unsigned int i=1; i <= floor_number; i++) {
         floors.push_back(Floor{i, coordinator_queue});
-        thread t{floors.back()};
+        thread t{ref(floors.back())};
         thread_pool.push_back(move(t));
     }
 
 
     for (unsigned int i=1; i <= number_of_elevators; i++) {
         elevators.push_back(Elevator{i, travel_time, coordinator_queue});
-        thread t{elevators.back()};
+        thread t{ref(elevators.back())};
         thread_pool.push_back(move(t));
     }
 
 
-    thread tc{Coordinator{elevators, coordinator_queue}};
+    thread tc{Coordinator{ref(elevators), coordinator_queue}};
     thread_pool.push_back(move(tc));
 
     thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators}};

@@ -16,9 +16,9 @@ public:
     
     unsigned int front();
     unsigned int get();
-    void erase(unsigned int);
-    void insert_l(unsigned int floor);
-    void insert_u(unsigned int floor);
+    void erase(unsigned int floor);
+    void insert_first(unsigned int floor);
+    void insert(unsigned int floor);
     bool empty();
 
 };

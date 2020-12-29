@@ -10,11 +10,8 @@ using namespace std;
 using namespace peg;
 
 void Repl::show_help(){
-    cout << ">>> " << flush;
     spdlog::info("Commands:");
-    cout << ">>> " << flush;
     spdlog::info("  CALL <floor_number>                    to simulate a button click in a floor, to call a elevator");
-    cout << ">>> " << flush;
     spdlog::info("  MOVE <floor_number> <elevator_number>  to simulate a button click in a certain elevator, to move to a certain floor");
 }
 
@@ -23,12 +20,10 @@ void Repl::call(string number) {
     if (unsigned (stoi(number)) <= this->floor_number) {
         Message message{"Floor" + number, "call", unsigned (stoi(number)), 0};
     
-        this->message_queue->push(message);
+        this->floors[stoi(number) +1].push(message);
     } else {
-        cout << ">>> " << flush;
         spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + number);
     }
-
 }
 
 
@@ -36,11 +31,9 @@ void Repl::move(string floor_number, string elevator_number) {
     if (unsigned (stoi(floor_number)) <= this->floor_number && unsigned (stoi(elevator_number)) <= this->elevator_number) {
         Message message{"Elevator" + elevator_number, "move", unsigned (stoi(floor_number)), unsigned (stoi(elevator_number))};
     
-        this->message_queue->push(message);
+        this->elevators[stoi(elevator_number) +1].push(message);
     }  else {
-        cout << ">>> " << flush;
         spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + floor_number + "!");
-        cout << ">>> " << flush;
         spdlog::warn("There are only " + to_string(this->elevator_number) + " Elevators! Your input: " + elevator_number +"!");
     }
 }
@@ -49,7 +42,6 @@ void Repl::operator()() {
 
     spdlog::set_pattern("[%^%l%$] %v");
 
-    cout << ">>> " << flush;
     spdlog::info("Type help to get a list of commands");
 
     parser parser(R"(
@@ -62,7 +54,7 @@ void Repl::operator()() {
 
         string input{};
 
-        cout << ">>> " << flush;
+        
         getline(cin, input);
 
 
@@ -89,11 +81,8 @@ void Repl::operator()() {
 
             }
         } else {
-            cout << ">>> " << flush;
             spdlog::warn("No Command: " + input);
             show_help();
-        }
-
-        
+        }        
     }
 }

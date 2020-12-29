@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "Message.h"
 #include "Elevator.h"
 #include "MessageQueue.h"
 
@@ -14,7 +15,7 @@ private:
 
 public:
     Coordinator(std::vector<Elevator>& elevators, MessageQueue* message_queue): 
-    elevators{elevators}, 
+    elevators{elevators},
     message_queue{message_queue}
     {};
 

@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <stdlib.h>
+#include <future>
 
 #include "spdlog/spdlog.h"
 #include "Elevator.h"
@@ -17,24 +18,29 @@ void Elevator::move_to(unsigned int floor){
     this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
     this->current_floor = floor;
 
-    spdlog::info("Elevator " + to_string(this->id) + " is now in Floor " + to_string(floor));
-    cout << ">>> " << flush;
+    spdlog::info("Elevator " + to_string(this->id) + " is now on Floor " + to_string(floor));
 }
 
 unsigned int Elevator::get_current_floor(){
     return this->current_floor;
 }
 
-void Elevator::operator()(){
 
+void Elevator::push(Message m){
+    this->message_queue->push(m);
+}
+
+void Elevator::operator()(){
+    future<void> send;
     while (1) {
         
-        Message message{this->message_queue->pop(this->name + to_string(this->id))};
+        Message message{this->message_queue->pop()};
         
-        spdlog::info("Floor " + to_string( message.get_floor()) + " button pressed in elevator " + to_string(this->id));
-        cout << ">>> " << flush;
+        send = async(launch::async, [&](){
+            Message send{"Coordinator", message.get_command(), message.get_floor(), message.get_elevator_id()};
+            this->coordinator_queue->push(send);
+        });
 
-        Message send{"Coordinator", message.get_command(), message.get_floor(), message.get_elevator_id()};
-        this->message_queue->push(send);
+        spdlog::info("Floor " + to_string( message.get_floor()) + " button pressed in elevator " + to_string(this->id));
     }
 }

@@ -13,6 +13,6 @@ private:
     std::mutex m{};
     std::condition_variable empty{};
 public:
-   Message pop(std::string message);
+   Message pop();
    void push(Message message);
 };

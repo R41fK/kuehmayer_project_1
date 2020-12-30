@@ -19,7 +19,37 @@ void Elevator::move_to(unsigned int floor) {
      }
 }
 
-void Elevator::move(){
+void Elevator::buttons(){
+    future<void> send;
+
+    while (1) {
+        
+        Message message{this->message_queue->pop()};
+        
+        send = async(launch::async, [&](){
+            Message send{"Coordinator", message.get_command(), message.get_floor(), message.get_elevator_id()};
+            this->coordinator_queue->push(send);
+        });
+
+        spdlog::info("Floor " + to_string( message.get_floor()) + " button pressed in elevator " + to_string(this->id) + " it is on Floor " + to_string(this->current_floor));
+    }
+}
+
+
+unsigned int Elevator::get_current_floor() { 
+    return this->current_floor;
+}
+
+bool Elevator::is_moving() {
+    return this->moving;
+}
+
+void Elevator::push(Message m) {
+    cout << "gota push: " << this->id << endl;
+    this->message_queue->push(m);
+}
+
+void Elevator::operator()() {
     unsigned int next{1};
 
     while (1) {
@@ -35,7 +65,6 @@ void Elevator::move(){
             } else {
                 this->next_floors->erase(next);
             }
-
             next = this->next_floors->get();
             this->moving = true;
         }
@@ -52,40 +81,5 @@ void Elevator::move(){
         }       
 
         this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
-
-        cout << this->test << "e" << endl;
-    }
-}
-
-
-unsigned int Elevator::get_current_floor() { 
-    return this->current_floor;
-}
-
-bool Elevator::is_moving() {
-    return this->moving;
-}
-
-void Elevator::push(Message m) {
-    this->message_queue->push(m);
-}
-
-void Elevator::operator()() {
-    future<void> send;
-
-    future<void> move = async(launch::async, [&](){
-        this->move();
-    });
-
-    while (1) {
-        
-        Message message{this->message_queue->pop()};
-        
-        send = async(launch::async, [&](){
-            Message send{"Coordinator", message.get_command(), message.get_floor(), message.get_elevator_id()};
-            this->coordinator_queue->push(send);
-        });
-
-        spdlog::info("Floor " + to_string( message.get_floor()) + " button pressed in elevator " + to_string(this->id));
     }
 }

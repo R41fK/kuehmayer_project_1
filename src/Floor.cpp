@@ -15,8 +15,6 @@ void Floor::operator()() {
 
         Message message{this->message_queue->pop()};
         spdlog::info("Called an elevator in floor " + to_string(this->id));
-        
-        cout << this->test << endl;
 
         send = async(launch::async, [&](){
             Message send{"Coordinator", message.get_command(), message.get_floor(), message.get_elevator_id()};

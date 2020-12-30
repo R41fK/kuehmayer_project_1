@@ -65,6 +65,10 @@ int main(int argc, char* argv[]) {
     vector<Elevator> elevators{};
     MessageQueue* coordinator_queue = new MessageQueue();
 
+    elevators.reserve(number_of_elevators);
+    floors.reserve(floor_number);
+    thread_pool.reserve(floor_number+number_of_elevators*2+2);
+
     cout << endl;
     cout << "***********************************************************************************************************************" << endl;
     cout << rang::fg::green
@@ -83,25 +87,27 @@ int main(int argc, char* argv[]) {
     spdlog::set_pattern("[%^%l%$] %v");
 
     for (unsigned int i=1; i <= floor_number; i++) {
-        floors.push_back(Floor{i, coordinator_queue});
+        floors.insert(floors.begin() + i - 1, Floor{i, coordinator_queue});
         thread t{ref(floors.back())};
         thread_pool.push_back(move(t));
     }
 
 
     for (unsigned int i=1; i <= number_of_elevators; i++) {
-        elevators.push_back(Elevator{i, travel_time, coordinator_queue});
+        elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue});
         thread t{ref(elevators.back())};
         thread_pool.push_back(move(t));
+        thread t1{[&](){
+            elevators.back().buttons();
+        }};
+        thread_pool.push_back(move(t1));
     }
-
 
     thread tc{Coordinator{ref(elevators), coordinator_queue}};
     thread_pool.push_back(move(tc));
 
     thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators}};
     thread_pool.push_back(move(tr));
-
 
     for (unsigned int i=0; i < thread_pool.size(); i++) {
         thread_pool[i].join();

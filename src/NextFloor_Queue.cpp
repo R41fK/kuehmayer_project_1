@@ -1,4 +1,5 @@
 #include <algorithm> 
+#include <iostream>
 
 #include "NextFloor_Queue.h"
 
@@ -11,6 +12,7 @@ unsigned int NextFloor_Queue::get() {
 }
 
 unsigned int NextFloor_Queue::front() {
+    lock_guard<mutex> lg{this->m};
     if (this->next_floors.empty()) {
         return 0;
     }
@@ -18,15 +20,18 @@ unsigned int NextFloor_Queue::front() {
 }
 
 void NextFloor_Queue::erase(unsigned int pos) {
+    lock_guard<mutex> lg{this->m};
     this->next_floors.erase(find(this->next_floors.begin(), this->next_floors.end(), pos));
 }
 
 void NextFloor_Queue::insert_first(unsigned int floor){
+    lock_guard<mutex> lg{this->m};
     this->next_floors.insert(this->next_floors.begin(), floor);
     this->con_empty.notify_one();
 }
 
 void NextFloor_Queue::insert(unsigned int floor){
+    lock_guard<mutex> lg{this->m};
     for (unsigned int i{1}; i < this->next_floors.size(); i++) {
         if ((this->next_floors[i-1] > floor && this->next_floors[i] <= floor)
         || (this->next_floors[i-1] < floor && this->next_floors[i] >= floor)
@@ -42,5 +47,6 @@ void NextFloor_Queue::insert(unsigned int floor){
 }
 
 bool NextFloor_Queue::empty() {
+    lock_guard<mutex> lg{this->m};
     return this->next_floors.empty();
 }

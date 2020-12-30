@@ -1,3 +1,4 @@
+#include <iostream>
 
 #include "Message.h"
 #include "MessageQueue.h"
@@ -14,7 +15,6 @@ void MessageQueue::push(Message message){
 Message MessageQueue::pop(){
     unique_lock<mutex> ul{this->m};
     empty.wait(ul, [this]{return this->message_queue.size();});
-                            
     Message return_message = this->message_queue.front();
     this->message_queue.pop();
     return return_message;

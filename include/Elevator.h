@@ -19,7 +19,6 @@ private:
     MessageQueue* coordinator_queue;
     NextFloor_Queue* next_floors;
 
-    void move();
 public:
     Elevator(unsigned int id, float travel_time, MessageQueue* coordinator_queue): 
     id{id}, 
@@ -34,9 +33,8 @@ public:
     unsigned int get_current_floor();
     bool is_moving();
     void operator()();
+    void buttons();
     void push(Message message);
-
-    std::string test{"Elevator"};
 
     // ~Elevator(){
     //     delete message_queue;

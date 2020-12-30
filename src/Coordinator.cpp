@@ -8,18 +8,18 @@
 using namespace std;
 
 
-unsigned int Coordinator::closest_elevator_not_mooving(unsigned int floor){
+unsigned int closest_elevator_not_mooving(unsigned int floor, vector<Elevator>& elevators){
     unsigned int diff_closest_floor{UINT_MAX};
     unsigned int closest_elevator{UINT_MAX};
     unsigned int diff{};
-    
+
     for (unsigned int i{0}; i < elevators.size(); i++) {
-        diff = max(this->elevators[i].get_current_floor(), floor) - min(this->elevators[i].get_current_floor(), floor);
-        if (diff < diff_closest_floor && !this->elevators[i].is_moving()) {
+        diff = max(elevators[i].get_current_floor(), floor) - min(elevators[i].get_current_floor(), floor);
+        if (diff < diff_closest_floor && !elevators[i].is_moving()) {
             diff_closest_floor = diff;
             closest_elevator = i;
-            
-            if(diff_closest_floor == 0){
+
+            if(diff_closest_floor == 1){
                 return closest_elevator;
             }
         }
@@ -28,18 +28,18 @@ unsigned int Coordinator::closest_elevator_not_mooving(unsigned int floor){
 }
 
 
-unsigned int Coordinator::closest_elevator_with_mooving(unsigned int floor){
+unsigned int closest_elevator_with_mooving(unsigned int floor, vector<Elevator>& elevators){
     unsigned int diff_closest_floor{UINT_MAX};
     unsigned int closest_elevator{UINT_MAX};
     unsigned int diff{};
-    
-    for (unsigned int i{0}; i < this->elevators.size(); i++) {
-        diff = max(this->elevators[i].get_current_floor(), floor) - min(this->elevators[i].get_current_floor(), floor);
+
+    for (unsigned int i{0}; i < elevators.size(); i++) {
+        diff = max(elevators[i].get_current_floor(), floor) - min(elevators[i].get_current_floor(), floor);
         if (diff < diff_closest_floor) {
             diff_closest_floor = diff;
             closest_elevator = i;
-            
-            if(diff_closest_floor == 0){
+
+            if(diff_closest_floor == 1){
                 return closest_elevator;
             }
         }
@@ -56,27 +56,24 @@ void Coordinator::operator()() {
         
         Message message{this->message_queue->pop()};
         
-        // spdlog::info(this->name + ": " +  message.get_command());
+        //spdlog::info(this->name + ": " +  message.get_command());
         send = async(launch::async, [&](){
             if (message.get_command() == "move") {
                 this->elevators[message.get_elevator_id()-1].move_to(message.get_floor());
 
             } else if (message.get_command() == "call") {
-                future<unsigned int> closest_not_mooving = async(launch::async, [&](){
-                    return this->closest_elevator_not_mooving(message.get_floor());
-                });
+                future<unsigned int> closest_not_mooving = async(launch::async, closest_elevator_not_mooving, message.get_floor(), ref(this->elevators));
 
-                future<unsigned int> closest_with_mooving = async(launch::async, [&](){
-                    return this->closest_elevator_with_mooving(message.get_floor());
-                });
+                future<unsigned int> closest_with_mooving = async(launch::async, closest_elevator_with_mooving, message.get_floor(), ref(this->elevators));
 
                 closest = closest_not_mooving.get();
-                cout << this->elevators[closest].test << " T" << endl;
+                cout << " T " << closest <<endl;
 
                 if (closest < this->elevators.size()) {
                     this->elevators[closest].move_to(message.get_floor());
                 } else {
                     closest = closest_with_mooving.get();
+                    cout << closest << endl;
                     this->elevators[closest].move_to(message.get_floor());
                 }
             }

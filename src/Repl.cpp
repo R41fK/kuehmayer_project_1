@@ -31,7 +31,6 @@ void Repl::move(string floor_number, string elevator_number) {
     if (unsigned (stoi(floor_number)) <= this->floor_number && unsigned (stoi(elevator_number)) <= this->elevator_number) {
         Message message{"Elevator" + elevator_number, "move", unsigned (stoi(floor_number)), unsigned (stoi(elevator_number))};
     
-        cout << elevator_number << " r" << endl;
         this->elevators[stoi(elevator_number) - 1].push(message);
     }  else {
         spdlog::warn("There are only " + to_string(this->floor_number) + " Floors! Your input: " + floor_number + "!");

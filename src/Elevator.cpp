@@ -11,8 +11,8 @@ using namespace std;
 
 
 void Elevator::move_to(unsigned int floor) {
-    if ((this->next_floors->front() >= floor && this->current_floor < floor)
-     || (this->next_floors->front() <= floor && this->current_floor > floor)){
+    if ((this->next_floors->front() >= floor && this->current_floor <= floor)
+     || (this->next_floors->front() <= floor && this->current_floor >= floor)){
         this->next_floors->insert_first(floor);
      } else {
         this->next_floors->insert(floor);
@@ -21,7 +21,7 @@ void Elevator::move_to(unsigned int floor) {
 
 void Elevator::buttons(){
     future<void> send;
-
+    spdlog::info("Started Buttons in Elevator: " + to_string(this->id));
     while (1) {
         
         Message message{this->message_queue->pop()};
@@ -45,7 +45,6 @@ bool Elevator::is_moving() {
 }
 
 void Elevator::push(Message m) {
-    cout << "gota push: " << this->id << endl;
     this->message_queue->push(m);
 }
 
@@ -80,6 +79,8 @@ void Elevator::operator()() {
             this->current_floor++;
         }       
 
-        this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
+        if (this->current_floor != next) {
+            this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
+        }
     }
 }

@@ -88,17 +88,17 @@ int main(int argc, char* argv[]) {
 
     for (unsigned int i=1; i <= floor_number; i++) {
         floors.insert(floors.begin() + i - 1, Floor{i, coordinator_queue});
-        thread t{ref(floors.back())};
+        thread t{ref(floors[i-1])};
         thread_pool.push_back(move(t));
     }
 
 
     for (unsigned int i=1; i <= number_of_elevators; i++) {
         elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue});
-        thread t{ref(elevators.back())};
+        thread t{ref(elevators[i-1])};
         thread_pool.push_back(move(t));
         thread t1{[&](){
-            elevators.back().buttons();
+            elevators[i-1].buttons();
         }};
         thread_pool.push_back(move(t1));
     }

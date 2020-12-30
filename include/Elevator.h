@@ -11,7 +11,7 @@ class Elevator
 {
 private:
     std::string name{"Elevator"};
-    unsigned int id{};
+    unsigned int id{1};
     unsigned int current_floor{1};
     bool moving{false};
     float travel_time{3.0};

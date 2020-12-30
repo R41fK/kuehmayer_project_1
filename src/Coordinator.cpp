@@ -19,7 +19,7 @@ unsigned int closest_elevator_not_mooving(unsigned int floor, vector<Elevator>& 
             diff_closest_floor = diff;
             closest_elevator = i;
 
-            if(diff_closest_floor == 1){
+            if(diff_closest_floor == 0){
                 return closest_elevator;
             }
         }
@@ -67,13 +67,11 @@ void Coordinator::operator()() {
                 future<unsigned int> closest_with_mooving = async(launch::async, closest_elevator_with_mooving, message.get_floor(), ref(this->elevators));
 
                 closest = closest_not_mooving.get();
-                cout << " T " << closest <<endl;
 
                 if (closest < this->elevators.size()) {
                     this->elevators[closest].move_to(message.get_floor());
                 } else {
                     closest = closest_with_mooving.get();
-                    cout << closest << endl;
                     this->elevators[closest].move_to(message.get_floor());
                 }
             }

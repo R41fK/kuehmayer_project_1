@@ -101,6 +101,7 @@ int main(int argc, char* argv[]) {
             elevators[i-1].buttons();
         }};
         thread_pool.push_back(move(t1));
+        this_thread::sleep_for(chrono::milliseconds(1));
     }
 
     thread tc{Coordinator{ref(elevators), coordinator_queue}};

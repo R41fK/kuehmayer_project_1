@@ -21,7 +21,7 @@ void Elevator::move_to(unsigned int floor) {
 
 void Elevator::buttons(){
     future<void> send;
-    spdlog::info("Started Buttons in Elevator: " + to_string(this->id));
+
     while (1) {
         
         Message message{this->message_queue->pop()};
@@ -54,7 +54,7 @@ void Elevator::operator()() {
     while (1) {
     
         if (this->current_floor == next) {
-            spdlog::info("Elevator " + to_string(this->id) + " is now on Floor " + to_string(next));
+            spdlog::info("Elevator " + to_string(this->id) + " is now on Floor " + to_string(this->current_floor));
             
         
             this_thread::sleep_for(chrono::seconds(1));
@@ -75,12 +75,10 @@ void Elevator::operator()() {
 
         if (this->current_floor > next) {
             this->current_floor--;
+            this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
         } else if (this->current_floor < next) {
             this->current_floor++;
-        }       
-
-        if (this->current_floor != next) {
             this_thread::sleep_for(chrono::milliseconds(int(travel_time * 1000)));
-        }
+        }       
     }
 }

@@ -13,6 +13,7 @@ private:
     MessageQueue* message_queue;
     std::string name{"Coordinator"};
 
+    unsigned int get_closest_elevator(Message message);
 public:
     Coordinator(std::vector<Elevator>& elevators, MessageQueue* message_queue): 
     elevators{elevators},

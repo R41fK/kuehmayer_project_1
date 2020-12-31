@@ -13,8 +13,8 @@ private:
     unsigned int floor_number{};
     unsigned int elevator_number{};
 
-    void move(std::string floor_number, std::string elevator_number);
-    void call(std::string number);
+    void move(std::string floor_number, std::string elevator_number, bool override);
+    void call(std::string number, bool override);
     void show_help();
 
 public:

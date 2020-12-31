@@ -30,6 +30,7 @@ public:
     };
 
     void move_to(unsigned int floor);
+    void first(unsigned int floor);
     unsigned int get_current_floor();
     bool is_moving();
     void operator()();

@@ -14,9 +14,13 @@ void Elevator::move_to(unsigned int floor) {
     if ((this->next_floors->front() >= floor && this->current_floor <= floor)
      || (this->next_floors->front() <= floor && this->current_floor >= floor)){
         this->next_floors->insert_first(floor);
-     } else {
+    } else {
         this->next_floors->insert(floor);
-     }
+    }
+}
+
+void Elevator::first(unsigned int floor) {
+    this->next_floors->insert_first(floor);    
 }
 
 void Elevator::buttons(){
@@ -31,7 +35,7 @@ void Elevator::buttons(){
             this->coordinator_queue->push(send);
         });
 
-        spdlog::info("Floor " + to_string( message.get_floor()) + " button pressed in elevator " + to_string(this->id) + " it is on Floor " + to_string(this->current_floor));
+        spdlog::info("Floor " + to_string( message.get_floor()) + " button pressed in elevator " + to_string(this->id));
     }
 }
 
@@ -63,6 +67,9 @@ void Elevator::operator()() {
                 this->moving = false;
             } else {
                 this->next_floors->erase(next);
+                if (this->next_floors->empty()) {
+                    this->moving = false;
+                }
             }
             next = this->next_floors->get();
             this->moving = true;

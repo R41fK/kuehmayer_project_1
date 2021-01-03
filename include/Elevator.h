@@ -29,15 +29,24 @@ public:
         next_floors = new NextFloor_Queue();
     };
 
+    // tell the elevator to move to a certain floor. If it is bewtween its own floor and the next floor it initiates to move to this floor next
     void move_to(unsigned int floor);
-    void first(unsigned int floor);
-    unsigned int get_current_floor();
-    bool is_moving();
-    void operator()();
-    void buttons();
-    void push(Message message);
 
-    // ~Elevator(){
-    //     delete message_queue;
-    // }
+    // ad floor to which the elevator should move to the front of its queue
+    void first(unsigned int floor);
+
+    // returns the current floor
+    unsigned int get_current_floor();
+
+    // returns if the elevator is currently moving
+    bool is_moving();
+
+    // a method to simulate the movment of the elevator, this method should be started as a thread
+    void operator()();
+
+    // a method to simulate the button clicks with should be started as a thread
+    void buttons();
+
+    // push a message in the elevators message queue
+    void push(Message message);
 };

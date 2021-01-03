@@ -20,5 +20,6 @@ public:
     message_queue{message_queue}
     {};
 
+    // a method to start the coordinator, should be started in a own thread
     void operator()();
 };

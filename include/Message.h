@@ -17,8 +17,15 @@ public:
     elevator_id{elevator_id}
     {};
 
+    // get the message
     std::string get_message();
+
+    // get the command
     std::string get_command();
+
+    // get the floor
     unsigned int get_floor();
+
+    // get the elevator id
     unsigned int get_elevator_id();
 };

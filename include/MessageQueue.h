@@ -13,6 +13,9 @@ private:
     std::mutex m{};
     std::condition_variable empty{};
 public:
-   Message pop();
-   void push(Message message);
+    // return the first message that was pushed in and deletes it from the queue. If there is none it waits until there is one.
+    Message pop();
+
+    // push a message in the queue and send a signal to a waiting thread.
+    void push(Message message);
 };

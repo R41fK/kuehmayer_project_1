@@ -14,8 +14,13 @@ private:
     unsigned int elevator_number{};
     bool override{false};
 
+    // create a message for the command move and push it to the queue
     void move(std::string floor_number, std::string elevator_number, bool override);
+
+    // create a message for the command call and push it to the queue
     void call(std::string number, bool override);
+
+    // show the commands for the repl
     void show_help();
 
 public:
@@ -27,5 +32,6 @@ public:
     override{override}
     {};
 
+    // a method that starts the repl, should be started in its own thread
     void operator()();
 };

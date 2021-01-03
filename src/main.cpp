@@ -15,7 +15,9 @@ using namespace std;
 using namespace rang;
 using json = nlohmann::json;
 
-string validate_float(const string& str) {
+
+//implement own validators for better error messages
+string validate_float(const string& str) { 
     size_t found{str.find_first_not_of("0123456789.")};
 
     if (found <= str.length()) {
@@ -26,7 +28,8 @@ string validate_float(const string& str) {
 }
 
 
-string validate_int(const string& str) {
+//implement own validators for better error messages
+string validate_int(const string& str) { 
     size_t found{str.find_first_not_of("0123456789")};
 
     if (found <= str.length()) {
@@ -37,6 +40,7 @@ string validate_int(const string& str) {
 }
 
 
+//validate the json config 
 json validate_json(const string& str) {
     json j;
     ifstream i(str);
@@ -93,6 +97,8 @@ int main(int argc, char* argv[]) {
     bool override{false};
     string config_file{};
 
+    // create CLI
+
     app.add_option("-s, --seconds-between-floors"
                   , travel_time
                   , "The time it takes to move between two floor_number, that are next to each other"
@@ -120,6 +126,8 @@ int main(int argc, char* argv[]) {
 
     CLI11_PARSE(app, argc, argv);
 
+    //use config file
+
     if (config_file != "") {
         json j = validate_json(config_file);
 
@@ -129,6 +137,8 @@ int main(int argc, char* argv[]) {
         override = j["override"];
     }
 
+    //create vectors and reserve their place 
+
     vector<Floor> floors{};
     vector<thread> thread_pool{};
     vector<Elevator> elevators{};
@@ -137,6 +147,8 @@ int main(int argc, char* argv[]) {
     elevators.reserve(number_of_elevators);
     floors.reserve(floor_number);
     thread_pool.reserve(floor_number+number_of_elevators*2+2);
+
+    //print a little summary of the programm
 
     cout << endl;
     cout << "***********************************************************************************************************************" << endl;
@@ -153,7 +165,11 @@ int main(int argc, char* argv[]) {
     cout << "***********************************************************************************************************************" << endl;
     cout << endl;
 
+    //set a pattern for the loggin messages
+
     spdlog::set_pattern("[%^%l%$] %v");
+
+    //create all floor threads
 
     for (unsigned int i=1; i <= floor_number; i++) {
         floors.insert(floors.begin() + i - 1, Floor{i, coordinator_queue});
@@ -161,6 +177,7 @@ int main(int argc, char* argv[]) {
         thread_pool.push_back(move(t));
     }
 
+    //create all elevator threads, one for the movement of the elevator and one for the buttons clicked in the elevator
 
     for (unsigned int i=1; i <= number_of_elevators; i++) {
         elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue});
@@ -174,11 +191,17 @@ int main(int argc, char* argv[]) {
         //because if another object gets pushed in the vector the reference would be wrong
     }
 
+    //create the coordinator thread
+
     thread tc{Coordinator{ref(elevators), coordinator_queue}};
     thread_pool.push_back(move(tc));
 
+    //create the repl thread
+
     thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override}};
     thread_pool.push_back(move(tr));
+
+    //join all threads
 
     for (unsigned int i=0; i < thread_pool.size(); i++) {
         thread_pool[i].join();

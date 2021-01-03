@@ -18,11 +18,9 @@ public:
         message_queue = new MessageQueue();
     };
 
+    // a method that simulates a button clicked in a floor
     void operator()();
 
+    // push a message in the queue of the floor
     void push(Message message);
-
-    // ~Floor(){
-    //     delete message_queue;
-    // }
 };

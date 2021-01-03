@@ -11,7 +11,9 @@ using namespace peg;
 
 void Repl::show_help(){
     spdlog::info("Commands:");
-    spdlog::info("  OVERRIDE <CALL|MOVE>                   Oeverride a command. The Elevator will travel to the given floor without stopping. Can be used on call and move");
+    if (this->override) {
+        spdlog::info("  OVERRIDE <CALL|MOVE>                   Oeverride a command. The Elevator will travel to the given floor without stopping. Can be used on call and move");
+    }
     spdlog::info("  CALL <floor_number>                    to simulate a button click in a floor, to call a elevator");
     spdlog::info("  MOVE <elevator_number> <floor_number>  to simulate a button click in a certain elevator, to move to a certain floor");
 }
@@ -54,14 +56,27 @@ void Repl::operator()() {
 
     spdlog::info("Type help to get a list of commands");
 
-    parser parser(R"(
-        Start    <- 'help' / Call / Move / Override
-        Override    <- 'override' Call / 'override' Move
-        Call        <- 'call' Number
-        Move        <- 'move' Number Number
-        Number      <- < [0-9]+ >
-        %whitespace <- [ \t]*
-    )");
+    parser parser;
+
+    if (this->override) {
+        parser = (R"(
+            Start    <- 'help' / Call / Move / Override
+            Override    <- 'override' Call / 'override' Move
+            Call        <- 'call' Number
+            Move        <- 'move' Number Number
+            Number      <- < [0-9]+ >
+            %whitespace <- [ \t]*
+        )");
+    } else {
+        parser = (R"(
+            Start    <- 'help' / Call / Move
+            Call        <- 'call' Number
+            Move        <- 'move' Number Number
+            Number      <- < [0-9]+ >
+            %whitespace <- [ \t]*
+        )");
+    }
+    
 
     string input{};
     bool override{false};

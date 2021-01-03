@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
     float travel_time{3.0};
     unsigned int floor_number{3};
     unsigned int number_of_elevators{1};
+    bool override{false};
 
     app.add_option("-s, --seconds-between-floor_number"
                   , travel_time
@@ -57,6 +58,10 @@ int main(int argc, char* argv[]) {
                    ,number_of_elevators
                    ,"Number of elevators"
                    , true)->check(validate_int);
+
+    app.add_flag("-o, --override"
+                 ,override
+                 ,"Add a override option to the elevators");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -107,7 +112,7 @@ int main(int argc, char* argv[]) {
     thread tc{Coordinator{ref(elevators), coordinator_queue}};
     thread_pool.push_back(move(tc));
 
-    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators}};
+    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override}};
     thread_pool.push_back(move(tr));
 
     for (unsigned int i=0; i < thread_pool.size(); i++) {

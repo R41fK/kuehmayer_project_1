@@ -5,6 +5,7 @@
 #include "CLI11.hpp"
 #include "rang.hpp"
 #include "spdlog/spdlog.h"
+#include "json.hpp"
 #include "Floor.h"
 #include "Coordinator.h"
 #include "Elevator.h"
@@ -12,6 +13,7 @@
 
 using namespace std;
 using namespace rang;
+using json = nlohmann::json;
 
 string validate_float(const string& str) {
     size_t found{str.find_first_not_of("0123456789.")};
@@ -35,6 +37,52 @@ string validate_int(const string& str) {
 }
 
 
+json validate_json(const string& str) {
+    json j;
+    ifstream i(str);
+    i >> j;
+
+    if (j.empty()) {
+        cerr << "Your config File is empty" << endl;
+        exit(0);
+    } else if (!j.contains("floor-number")) {
+        cerr << "Missing configuration for uint floor-number" << endl;
+        exit(0);
+    } else if (!j.contains("elevators")) {
+        cerr << "Missing configuration for uint elevators" << endl;
+        exit(0);
+    } else if (!j.contains("seconds-between-floors")) {
+        cerr << "Missing configuration for float seconds-between-floors" << endl;
+        exit(0);
+    } else if (!j.contains("override")) {
+        cerr << "Missing configuration for bool override" << endl;
+        exit(0);
+    } else if (!j["override"].is_boolean()) {
+        cerr << "Override musst be a boolean" << endl;
+        exit(0);
+    } else if (!j["elevators"].is_number()) {
+        cerr << "Elevators musst be a unsigned integer" << endl;
+        exit(0);
+    } else if (!j["floor-number"].is_number()) {
+        cerr << "Floor-number musst be a unsigned integer" << endl;
+        exit(0);
+    } else if (!j["seconds-between-floors"].is_number()) {
+        cerr << "Seconds-between-floors musst be a float" << endl;
+        exit(0);
+    } else if (validate_int(to_string(j["elevators"])) != "") { //use of validate function to see if it is a integer or a float
+        cerr << "Elevators musst be a unsigned integer" << endl;
+        exit(0);
+    } else if (validate_int(to_string(j["floor-number"])) != "") { //use of validate function to see if it is a integer or a float
+        cerr << "Floor-number musst be a unsigned integer" << endl;
+        exit(0);
+    } else if (j["seconds-between-floors"] < 0) {
+        cerr << "Seconds-between-floors musst be a positive float" << endl;
+        exit(0);
+    }
+
+    return j;
+}
+
 int main(int argc, char* argv[]) {
     
     CLI::App app("elevator_control");
@@ -43,27 +91,43 @@ int main(int argc, char* argv[]) {
     unsigned int floor_number{3};
     unsigned int number_of_elevators{1};
     bool override{false};
+    string config_file{};
 
-    app.add_option("-s, --seconds-between-floor_number"
+    app.add_option("-s, --seconds-between-floors"
                   , travel_time
                   , "The time it takes to move between two floor_number, that are next to each other"
                   , true)->check(validate_float);
 
-    app.add_option("-f, --floor_number"
+    app.add_option("-f, --floor-number"
                   , floor_number
-                  , "Number of floor_number for the elevator"
+                  , "Number of floors for the elevator"
                   , true)->check(validate_int);
 
     app.add_option("-e, --elevators"
-                   ,number_of_elevators
-                   ,"Number of elevators"
+                   , number_of_elevators
+                   , "Number of elevators"
                    , true)->check(validate_int);
+
+    app.add_option("-c, --config-file"
+                   , config_file
+                   , "Get the configuration of the program from a JSON file. Overwrites other configurations"
+                   )->check(CLI::ExistingFile);
+
 
     app.add_flag("-o, --override"
                  ,override
                  ,"Add a override option to the elevators");
 
     CLI11_PARSE(app, argc, argv);
+
+    if (config_file != "") {
+        json j = validate_json(config_file);
+
+        travel_time = j["seconds-between-floors"];
+        number_of_elevators = j["elevators"];
+        floor_number = j["floor-number"];
+        override = j["override"];
+    }
 
     vector<Floor> floors{};
     vector<thread> thread_pool{};
@@ -106,7 +170,8 @@ int main(int argc, char* argv[]) {
             elevators[i-1].buttons();
         }};
         thread_pool.push_back(move(t1));
-        this_thread::sleep_for(chrono::milliseconds(1));
+        this_thread::sleep_for(chrono::milliseconds(1)); //waiting so that the thread can start instantly, 
+        //because if another object gets pushed in the vector the reference would be wrong
     }
 
     thread tc{Coordinator{ref(elevators), coordinator_queue}};

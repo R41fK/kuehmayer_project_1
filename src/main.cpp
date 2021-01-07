@@ -6,6 +6,7 @@
 #include "CLI11.hpp"
 #include "rang.hpp"
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
 #include "json.hpp"
 #include "toml.hpp"
 #include "Floor.h"
@@ -143,8 +144,10 @@ int main(int argc, char* argv[]) {
     unsigned int floor_number{3};
     unsigned int number_of_elevators{1};
     bool override{false};
+    bool log_to_file{false};
     string config_file_json{};
     string config_file_toml{};
+    string log_file{"error.log"};
 
     // create CLI
 
@@ -175,11 +178,20 @@ int main(int argc, char* argv[]) {
                                 )->excludes(option_s)->excludes(option_f)->excludes(option_e)->excludes(option_j)
                                 ->check(CLI::ExistingFile)};
 
-
     app.add_flag("-o, --override"
                  ,override
                  ,"Add a override option to the elevators")
                  ->excludes(option_j)->excludes(option_t);
+
+    auto flag_l{app.add_flag("-l, --log-to-file"
+                            ,log_to_file
+                            ,"Set if the program should log to a file (Logs more than is shown in console)")};
+
+    app.add_option("--log-file"
+                  , log_file
+                  , "Define a file in that the logs are written"
+                  , true)->needs(flag_l);
+
 
     CLI11_PARSE(app, argc, argv);
 
@@ -196,6 +208,14 @@ int main(int argc, char* argv[]) {
         use_toml_config(config_file_toml, floor_number, number_of_elevators, travel_time, override);
     }
 
+    //set a pattern for the loggin messages and create a file logger
+
+    spdlog::set_pattern("[%^%l%$] %v");
+
+    std::shared_ptr<spdlog::logger> file_logger{spdlog::basic_logger_mt("basic_logger", log_file)};
+    file_logger->set_level(spdlog::level::info);
+    file_logger->flush_on(spdlog::level::info);
+    file_logger->set_pattern("[%H:%M:%S %z] [%^%l%$] [thread %t] %v");
 
     //create vectors and reserve their place 
 
@@ -212,7 +232,7 @@ int main(int argc, char* argv[]) {
 
     cout << endl;
     print_stars();
-    
+
     cout << rang::fg::green
          << rang::style::bold  << "Started elevator_control with " 
          << rang::fg::yellow   << floor_number << " Floors " 
@@ -236,14 +256,10 @@ int main(int argc, char* argv[]) {
     print_stars();
     cout << endl;
 
-    //set a pattern for the loggin messages
-
-    spdlog::set_pattern("[%^%l%$] %v");
-
     //create all floor threads
 
     for (unsigned int i=1; i <= floor_number; i++) {
-        floors.insert(floors.begin() + i - 1, Floor{i, coordinator_queue});
+        floors.insert(floors.begin() + i - 1, Floor{i, coordinator_queue, file_logger, log_to_file});
         thread t{ref(floors[i-1])};
         thread_pool.push_back(move(t));
     }
@@ -251,7 +267,7 @@ int main(int argc, char* argv[]) {
     //create all elevator threads, one for the movement of the elevator and one for the buttons clicked in the elevator
 
     for (unsigned int i=1; i <= number_of_elevators; i++) {
-        elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue});
+        elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue, file_logger, log_to_file});
         thread t{ref(elevators[i-1])};
         thread_pool.push_back(move(t));
         thread t1{[&](){
@@ -264,12 +280,12 @@ int main(int argc, char* argv[]) {
 
     //create the coordinator thread
 
-    thread tc{Coordinator{ref(elevators), coordinator_queue}};
+    thread tc{Coordinator{ref(elevators), coordinator_queue, file_logger, log_to_file}};
     thread_pool.push_back(move(tc));
 
     //create the repl thread
 
-    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override}};
+    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger, log_to_file}};
     thread_pool.push_back(move(tr));
 
     //join all threads

@@ -3,6 +3,9 @@
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+#include <memory>
+
+#include "spdlog/sinks/basic_file_sink.h"
 
 class NextFloor_Queue
 {
@@ -11,8 +14,15 @@ private:
     std::vector<unsigned int> next_floors{};
     std::mutex m{};
     std::condition_variable con_empty{};
+    bool log_to_file{false};
+    std::shared_ptr<spdlog::logger> file_logger;
 
 public:
+
+    NextFloor_Queue(std::shared_ptr<spdlog::logger> file_logger, bool log_to_file):
+    log_to_file{log_to_file},
+    file_logger{file_logger}
+    {}
 
     // get the first iteam in the queue, if there is none it return 0
     unsigned int front();

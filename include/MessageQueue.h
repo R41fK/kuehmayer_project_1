@@ -12,6 +12,7 @@ private:
     std::queue<Message> message_queue{};
     std::mutex m{};
     std::condition_variable empty{};
+    
 public:
     // return the first message that was pushed in and deletes it from the queue. If there is none it waits until there is one.
     Message pop();

@@ -2,7 +2,9 @@
 
 #include <mutex>
 #include <condition_variable>
+#include <memory>
 
+#include "spdlog/sinks/basic_file_sink.h"
 #include "MessageQueue.h"
 #include "Message.h"
 #include "NextFloor_Queue.h"
@@ -18,15 +20,19 @@ private:
     MessageQueue* message_queue;
     MessageQueue* coordinator_queue;
     NextFloor_Queue* next_floors;
+    bool log_to_file{false};
+    std::shared_ptr<spdlog::logger> file_logger;
 
 public:
-    Elevator(unsigned int id, float travel_time, MessageQueue* coordinator_queue): 
+    Elevator(unsigned int id, float travel_time, MessageQueue* coordinator_queue, std::shared_ptr<spdlog::logger> file_logger, bool log_to_file): 
     id{id}, 
     travel_time{travel_time},
-    coordinator_queue{coordinator_queue}
+    coordinator_queue{coordinator_queue},    
+    log_to_file{log_to_file},
+    file_logger{file_logger}
     {
         message_queue = new MessageQueue();
-        next_floors = new NextFloor_Queue();
+        next_floors = new NextFloor_Queue(file_logger, log_to_file);
     };
 
     // tell the elevator to move to a certain floor. If it is bewtween its own floor and the next floor it initiates to move to this floor next

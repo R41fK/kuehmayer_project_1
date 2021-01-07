@@ -9,6 +9,7 @@ private:
     std::string command{};
     unsigned int floor{};
     unsigned int elevator_id{};
+    
 public:
     Message(std::string message, std::string command, unsigned int floor, unsigned int elevator_id):
     message{message},

@@ -1,0 +1,6 @@
+[elevator_control]
+
+floor-number = 5
+elevators = 2
+seconds-between-floors = 3.5
+override = true

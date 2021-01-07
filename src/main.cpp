@@ -1,11 +1,13 @@
 
 #include <iostream>
 #include <thread>
+#include <fstream>
 
 #include "CLI11.hpp"
 #include "rang.hpp"
 #include "spdlog/spdlog.h"
 #include "json.hpp"
+#include "toml.hpp"
 #include "Floor.h"
 #include "Coordinator.h"
 #include "Elevator.h"
@@ -34,7 +36,7 @@ string validate_int(const string& str) {
 
     if (found <= str.length()) {
         return str + " is not a int or not positive";
-    }
+    } 
 
     return "";
 }
@@ -43,49 +45,95 @@ string validate_int(const string& str) {
 //validate the json config 
 json validate_json(const string& str) {
     json j;
-    ifstream i(str);
-    i >> j;
 
-    if (j.empty()) {
-        cerr << "Your config File is empty" << endl;
+    try {
+        ifstream i(str);
+        i >> j;
+    } catch (const nlohmann::detail::parse_error& err) {
+        cerr << "Not Valid json" << endl;
+        cerr << err.what() << endl;
         exit(0);
-    } else if (!j.contains("floor-number")) {
-        cerr << "Missing configuration for uint floor-number" << endl;
-        exit(0);
-    } else if (!j.contains("elevators")) {
-        cerr << "Missing configuration for uint elevators" << endl;
-        exit(0);
-    } else if (!j.contains("seconds-between-floors")) {
-        cerr << "Missing configuration for float seconds-between-floors" << endl;
-        exit(0);
-    } else if (!j.contains("override")) {
-        cerr << "Missing configuration for bool override" << endl;
-        exit(0);
-    } else if (!j["override"].is_boolean()) {
-        cerr << "Override musst be a boolean" << endl;
-        exit(0);
-    } else if (!j["elevators"].is_number()) {
-        cerr << "Elevators musst be a unsigned integer" << endl;
-        exit(0);
-    } else if (!j["floor-number"].is_number()) {
-        cerr << "Floor-number musst be a unsigned integer" << endl;
-        exit(0);
-    } else if (!j["seconds-between-floors"].is_number()) {
-        cerr << "Seconds-between-floors musst be a float" << endl;
-        exit(0);
-    } else if (validate_int(to_string(j["elevators"])) != "") { //use of validate function to see if it is a integer or a float
-        cerr << "Elevators musst be a unsigned integer" << endl;
-        exit(0);
-    } else if (validate_int(to_string(j["floor-number"])) != "") { //use of validate function to see if it is a integer or a float
-        cerr << "Floor-number musst be a unsigned integer" << endl;
-        exit(0);
-    } else if (j["seconds-between-floors"] < 0) {
-        cerr << "Seconds-between-floors musst be a positive float" << endl;
-        exit(0);
+    }
+    
+
+    if (j.contains("floor-number")) {
+        if (validate_int(to_string(j["floor-number"])) != "" && j["floor-number"] <= 0) { //use of validate function to see if it is a integer or a float
+            cerr << "Floor-number musst be a unsigned integer greater than 0" << endl;
+            exit(0);
+        }
+    } else if (j.contains("elevators")) {
+        if (validate_int(to_string(j["elevators"])) != "" && j["elevators"] <= 0) { //use of validate function to see if it is a integer or a float
+            cerr << "Elevators musst be a unsigned integer greater than 0 " << endl;
+            exit(0);
+        }
+    } else if (j.contains("seconds-between-floors")) {
+        if (!j["seconds-between-floors"].is_number() || j["seconds-between-floors"] <= 0) {
+            cerr << "Seconds-between-floors musst be a positive float greater than 0" << endl;
+            exit(0);
+        }
+    } else if (j.contains("override")) {
+        if (!j["override"].is_boolean()) {
+            cerr << "Override musst be a boolean" << endl;
+            exit(0);
+        }
     }
 
     return j;
 }
+
+
+void use_toml_config(string config_file_toml, uint& floor_number, uint& number_of_elevators, float& travel_time, bool& override){
+    try {
+        toml::table t =  toml::parse_file(config_file_toml);
+
+        if (t["elevator_control"]["seconds-between-floors"]) {
+            try {
+                travel_time = t["elevator_control"]["seconds-between-floors"].value<float>().value();
+            } catch (const bad_optional_access& err) {
+                cerr << "Seconds-between-floors musst be a positive float greater than 0" << endl;
+                exit(0);
+            }
+        }
+        if (t["elevator_control"]["elevators"]) {
+            try {
+                number_of_elevators = t["elevator_control"]["elevators"].value<uint>().value();
+            } catch (const bad_optional_access& err) {
+                cerr << "Elevators musst be a unsigned integer greater than 0" << endl;
+                exit(0);
+            }
+        }
+        if (t["elevator_control"]["floor-number"]) {
+            try {
+                floor_number = t["elevator_control"]["floor-number"].value<uint>().value();
+            } catch (const bad_optional_access& err) {
+                cerr << "Floor-number musst be a unsigned integer greater than 0" << endl;
+                exit(0);
+            }
+        }
+        if (t["elevator_control"]["override"]) {
+            try {
+                override = t["elevator_control"]["override"].value<bool>().value();
+            } catch (const bad_optional_access& err) {
+                cerr << "Override musst be a boolean" << endl;
+                exit(0);
+            }
+        }
+        
+    } catch (const toml::parse_error& err) {
+        cerr << "Not Valid toml" << endl;
+        cerr << err.what() << endl;
+        exit(0);
+    }
+}
+
+
+void print_stars(){
+    for (int i=0; i < 143; i++){
+        cout << "*";
+    }
+    cout << endl;
+}
+
 
 int main(int argc, char* argv[]) {
     
@@ -95,47 +143,59 @@ int main(int argc, char* argv[]) {
     unsigned int floor_number{3};
     unsigned int number_of_elevators{1};
     bool override{false};
-    string config_file{};
+    string config_file_json{};
+    string config_file_toml{};
 
     // create CLI
 
-    app.add_option("-s, --seconds-between-floors"
-                  , travel_time
-                  , "The time it takes to move between two floor_number, that are next to each other"
-                  , true)->check(validate_float);
+    auto option_s{app.add_option("-s, --seconds-between-floors"
+                                , travel_time
+                                , "The time it takes to move between two floor_number, that are next to each other"
+                                , true)->check(validate_float)->check(CLI::PositiveNumber)};
 
-    app.add_option("-f, --floor-number"
-                  , floor_number
-                  , "Number of floors for the elevator"
-                  , true)->check(validate_int);
+    auto option_f{app.add_option("-f, --floor-number"
+                                , floor_number
+                                , "Number of floors for the elevator"
+                                , true)->check(validate_int)->check(CLI::PositiveNumber)};
 
-    app.add_option("-e, --elevators"
-                   , number_of_elevators
-                   , "Number of elevators"
-                   , true)->check(validate_int);
+    auto option_e{app.add_option("-e, --elevators"
+                                , number_of_elevators
+                                , "Number of elevators"
+                                , true)->check(validate_int)->check(CLI::PositiveNumber)};
 
-    app.add_option("-c, --config-file"
-                   , config_file
-                   , "Get the configuration of the program from a JSON file. Overwrites other configurations"
-                   )->check(CLI::ExistingFile);
+    auto option_j{app.add_option("-j, --config-file-json"
+                                , config_file_json
+                                , "Get the configuration of the program from a JSON file. Overwrites other configurations"
+                                )->excludes(option_s)->excludes(option_f)->excludes(option_e)
+                                ->check(CLI::ExistingFile)};
+
+    auto option_t{app.add_option("-t, --config-file-toml"
+                                , config_file_toml
+                                , "Get the configuration of the program from a JSON file. Overwrites other configurations"
+                                )->excludes(option_s)->excludes(option_f)->excludes(option_e)->excludes(option_j)
+                                ->check(CLI::ExistingFile)};
 
 
     app.add_flag("-o, --override"
                  ,override
-                 ,"Add a override option to the elevators");
+                 ,"Add a override option to the elevators")
+                 ->excludes(option_j)->excludes(option_t);
 
     CLI11_PARSE(app, argc, argv);
 
     //use config file
 
-    if (config_file != "") {
-        json j = validate_json(config_file);
+    if (config_file_json != "") {
+        json j = validate_json(config_file_json);
 
         travel_time = j["seconds-between-floors"];
         number_of_elevators = j["elevators"];
         floor_number = j["floor-number"];
         override = j["override"];
+    } else if (config_file_toml != "") {
+        use_toml_config(config_file_toml, floor_number, number_of_elevators, travel_time, override);
     }
+
 
     //create vectors and reserve their place 
 
@@ -151,18 +211,29 @@ int main(int argc, char* argv[]) {
     //print a little summary of the programm
 
     cout << endl;
-    cout << "***********************************************************************************************************************" << endl;
+    print_stars();
+    
     cout << rang::fg::green
          << rang::style::bold  << "Started elevator_control with " 
          << rang::fg::yellow   << floor_number << " Floors " 
          << rang::fg::green    << "and "
          << rang::fg::yellow   << number_of_elevators << " Elevator(s)"
-         << rang::fg::green    << ". A Elevator " 
+         << rang::fg::green    << ". An Elevator " 
          << rang::fg::yellow   << "travels " << travel_time << "s" 
-         << rang::fg::green    << " from one floor to the next one."
-         << rang::style::reset 
+         << rang::fg::green    << " from one floor to the next one. "
+         << rang::fg::yellow   << "Override "
+         << rang::fg::green    << "is ";
+
+    if (override) {
+        cout << rang::fg::yellow << "activated.";
+    } else {
+        cout << rang::fg::yellow << "deactivated.";
+    }
+
+    cout << rang::style::reset 
          << rang::fg::reset << endl;
-    cout << "***********************************************************************************************************************" << endl;
+
+    print_stars();
     cout << endl;
 
     //set a pattern for the loggin messages

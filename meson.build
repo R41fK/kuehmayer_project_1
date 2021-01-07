@@ -25,6 +25,8 @@ add_global_arguments('-I' + get_option('spdlog_include_dir'), language : 'cpp')
 # json: https://github.com/nlohmann/json
 add_global_arguments('-I' + get_option('json_include_dir'), language : 'cpp')
 
+add_global_arguments('-I' + get_option('toml_include_dir'), language : 'cpp')
+
 # add additional include global arguments appropriately!
 
 # # begin protobuf: https://developers.google.com/protocol-buffers/

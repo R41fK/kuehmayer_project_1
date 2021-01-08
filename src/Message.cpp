@@ -1,3 +1,4 @@
+#include <sstream>
 
 #include "Message.h"
 
@@ -17,4 +18,11 @@ unsigned int Message::get_floor(){
 
 unsigned int Message::get_elevator_id(){
     return this->elevator_id;
+}
+
+string Message::to_string(){
+    stringstream Str;
+    Str << "Message(message=" << this->message << ", command=" << this->command 
+            << ", floor=" << this->floor << ", elevator_id=" << this->elevator_id << ")";
+    return Str.str();
 }

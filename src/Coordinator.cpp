@@ -58,6 +58,11 @@ unsigned int Coordinator::get_closest_elevator(Message message){
 
     if (closest >= this->elevators.size()) {
         closest = closest_with_mooving.get();
+
+        this->file_logger->info("Coordinator found no elevator that is not moving. Nearest that is mooving is elevator " + to_string(closest));
+        
+    } else {
+        this->file_logger->info("Coordinator found an elevator that is not moving. That elevator is elevator " + to_string(closest));
     }
 
     return closest;
@@ -70,21 +75,39 @@ void Coordinator::operator()() {
     while (1) {
         
         Message message{this->message_queue->pop()};
-        
+
+        this->file_logger->debug("Coordinator got the " + message.to_string());
+
         //spdlog::info(this->name + ": " +  message.get_command());
         send = async(launch::async, [&](){
             if (message.get_command() == "override") {
                 if (message.get_elevator_id() == 0) {
-                    this->elevators[this->get_closest_elevator(message)].first(message.get_floor());
+                    unsigned int elevator_id{this->get_closest_elevator(message)};
+
+                    this->file_logger->debug("Coordinator got Override and tells Elevator " + to_string(elevator_id+1) 
+                                            + " to move to Floor " + to_string(message.get_floor())  + " without stopping");
+
+                    this->elevators[elevator_id].first(message.get_floor());
                 } else {
+                    this->file_logger->debug("Coordinator got Override and tells Elevator " + to_string(message.get_elevator_id()) 
+                                            + " to move to Floor " + to_string(message.get_floor()) + " without stopping");
+
                     this->elevators[message.get_elevator_id()-1].first(message.get_floor());
                 }
 
             } else if (message.get_command() == "move") {
+                this->file_logger->debug("Coordinator tells Elevator " + to_string(message.get_elevator_id()) 
+                                        + " to move to Floor " + to_string(message.get_floor()));                
+
                 this->elevators[message.get_elevator_id()-1].move_to(message.get_floor());
 
             } else if (message.get_command() == "call") {
-                this->elevators[this->get_closest_elevator(message)].move_to(message.get_floor());
+                unsigned int elevator_id{this->get_closest_elevator(message)};
+
+                this->file_logger->debug("Coordinator tells Elevator " + to_string(elevator_id+1) 
+                                        + " to move to Floor " + to_string(message.get_floor()));
+
+                this->elevators[elevator_id].move_to(message.get_floor());
             }
         });
     }

@@ -16,16 +16,14 @@ void Floor::operator()() {
         Message message{this->message_queue->pop()};
         spdlog::info("Called an elevator in floor " + to_string(this->id));
 
-        if (this->log_to_file) {
-            this->file_logger->info("Called an elevator in floor " + to_string(this->id));
-        }
+        this->file_logger->info("Called an elevator in floor " + to_string(this->id));
 
         send = async(launch::async, [&](){
             Message send{"Coordinator", message.get_command(), message.get_floor(), message.get_elevator_id()};
+           
+            this->file_logger->debug("Floor " + to_string(this->id) + " sent the " + message.to_string() + " to the Coordinator");
+
             this->coordinator_queue->push(send);
-            if (this->log_to_file) {
-                this->file_logger->info("Floor " + to_string(this->id) + " sent the Message to the Coordinator");
-            }
         });
     }
 }

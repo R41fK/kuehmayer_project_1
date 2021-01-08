@@ -145,9 +145,10 @@ int main(int argc, char* argv[]) {
     unsigned int number_of_elevators{1};
     bool override{false};
     bool log_to_file{false};
+    bool log_level_debug{false};
     string config_file_json{};
     string config_file_toml{};
-    string log_file{"error.log"};
+    string log_file{"control.log"};
 
     // create CLI
 
@@ -184,8 +185,13 @@ int main(int argc, char* argv[]) {
                  ->excludes(option_j)->excludes(option_t);
 
     auto flag_l{app.add_flag("-l, --log-to-file"
-                            ,log_to_file
-                            ,"Set if the program should log to a file (Logs more than is shown in console)")};
+                            , log_to_file
+                            , "Set if the program should log to a file (Logs more than is shown in console)")};
+
+    app.add_flag("-d, --log-level-debug"
+                , log_level_debug
+                , "Sets the loginglevel for log-to-file to debug (default=info)")
+                ->needs(flag_l);
 
     app.add_option("--log-file"
                   , log_file
@@ -212,10 +218,23 @@ int main(int argc, char* argv[]) {
 
     spdlog::set_pattern("[%^%l%$] %v");
 
-    std::shared_ptr<spdlog::logger> file_logger{spdlog::basic_logger_mt("basic_logger", log_file)};
-    file_logger->set_level(spdlog::level::info);
-    file_logger->flush_on(spdlog::level::info);
-    file_logger->set_pattern("[%H:%M:%S %z] [%^%l%$] [thread %t] %v");
+    std::shared_ptr<spdlog::logger> file_logger{spdlog::basic_logger_mt("file_logger", log_file)};
+    if (log_to_file) {
+        if (log_level_debug) {
+            file_logger->set_level(spdlog::level::debug);
+            file_logger->flush_on(spdlog::level::debug);
+        } else {
+            file_logger->set_level(spdlog::level::info);
+            file_logger->flush_on(spdlog::level::info);
+        }
+    } else {
+        file_logger->set_level(spdlog::level::off);
+        file_logger->flush_on(spdlog::level::off);
+    }
+    
+   
+    file_logger->set_pattern("[%H:%M:%S] [thread %t] [%^%l%$] %v");
+    file_logger->info("Started elevator_control");
 
     //create vectors and reserve their place 
 
@@ -253,13 +272,31 @@ int main(int argc, char* argv[]) {
     cout << rang::style::reset 
          << rang::fg::reset << endl;
 
+
+    if (log_to_file) {
+        cout << endl;
+        cout << rang::style::bold << rang::fg::yellow
+             << "Logging activated" << rang::fg::green
+             << " with the " << rang::fg::yellow
+             << " logging-level ";
+        if (log_level_debug) {
+            cout << "debug";
+        } else {
+            cout << "info";
+        }
+        cout << rang::fg::green << ". The logger writes in the file "
+             << rang::fg::yellow << log_file;
+
+        cout << rang::style::reset 
+         << rang::fg::reset << endl;
+    }
     print_stars();
     cout << endl;
 
     //create all floor threads
 
     for (unsigned int i=1; i <= floor_number; i++) {
-        floors.insert(floors.begin() + i - 1, Floor{i, coordinator_queue, file_logger, log_to_file});
+        floors.insert(floors.begin() + i - 1, Floor{i, coordinator_queue, file_logger});
         thread t{ref(floors[i-1])};
         thread_pool.push_back(move(t));
     }
@@ -267,7 +304,7 @@ int main(int argc, char* argv[]) {
     //create all elevator threads, one for the movement of the elevator and one for the buttons clicked in the elevator
 
     for (unsigned int i=1; i <= number_of_elevators; i++) {
-        elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue, file_logger, log_to_file});
+        elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue, file_logger});
         thread t{ref(elevators[i-1])};
         thread_pool.push_back(move(t));
         thread t1{[&](){
@@ -280,12 +317,12 @@ int main(int argc, char* argv[]) {
 
     //create the coordinator thread
 
-    thread tc{Coordinator{ref(elevators), coordinator_queue, file_logger, log_to_file}};
+    thread tc{Coordinator{ref(elevators), coordinator_queue, file_logger}};
     thread_pool.push_back(move(tc));
 
     //create the repl thread
 
-    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger, log_to_file}};
+    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger}};
     thread_pool.push_back(move(tr));
 
     //join all threads

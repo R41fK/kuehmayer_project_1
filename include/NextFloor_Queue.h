@@ -14,13 +14,11 @@ private:
     std::vector<unsigned int> next_floors{};
     std::mutex m{};
     std::condition_variable con_empty{};
-    bool log_to_file{false};
     std::shared_ptr<spdlog::logger> file_logger;
 
 public:
 
-    NextFloor_Queue(std::shared_ptr<spdlog::logger> file_logger, bool log_to_file):
-    log_to_file{log_to_file},
+    NextFloor_Queue(std::shared_ptr<spdlog::logger> file_logger):
     file_logger{file_logger}
     {}
 

@@ -16,7 +16,6 @@ private:
     unsigned int floor_number{};
     unsigned int elevator_number{};
     bool override{false};
-    bool log_to_file{false};
     std::shared_ptr<spdlog::logger> file_logger;
 
     // create a message for the command move and push it to the queue
@@ -30,13 +29,12 @@ private:
 
 public:
     Repl(std::vector<Floor>& floors, std::vector<Elevator>& elevators, unsigned int floor_number
-    , unsigned int elevator_number, bool override, std::shared_ptr<spdlog::logger> file_logger, bool log_to_file): 
+    , unsigned int elevator_number, bool override, std::shared_ptr<spdlog::logger> file_logger): 
     floors{floors},
     elevators{elevators},
     floor_number{floor_number},
     elevator_number{elevator_number},
     override{override},
-    log_to_file{log_to_file},
     file_logger{file_logger}
     {};
 

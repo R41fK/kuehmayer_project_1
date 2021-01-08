@@ -21,10 +21,15 @@ void Repl::show_help(){
 
 void Repl::call(string number, bool override) {
     if (unsigned (stoi(number)) <= this->floor_number) {
+        
         if (override) {
+            this->file_logger->debug("User input override call " + number);
+
             Message message{"Floor" + number, "override", unsigned (stoi(number)), 0};
             this->floors[stoi(number) - 1].push(message);
         } else {
+            this->file_logger->debug("User input call " + number);
+
             Message message{"Floor" + number, "call", unsigned (stoi(number)), 0};
             this->floors[stoi(number) - 1].push(message);
         }
@@ -39,9 +44,13 @@ void Repl::call(string number, bool override) {
 void Repl::move(string floor_number, string elevator_number, bool override) {
     if (unsigned (stoi(floor_number)) <= this->floor_number && unsigned (stoi(elevator_number)) <= this->elevator_number) {
         if (override) {
+            this->file_logger->debug("User input override move " + elevator_number + " " + floor_number);
+
             Message message{"Elevator" + elevator_number, "override", unsigned (stoi(floor_number)), unsigned (stoi(elevator_number))};
             this->elevators[stoi(elevator_number) - 1].push(message);
         } else {
+            this->file_logger->debug("User input move " + elevator_number + " " + floor_number);
+
             Message message{"Elevator" + elevator_number, "move", unsigned (stoi(floor_number)), unsigned (stoi(elevator_number))};
             this->elevators[stoi(elevator_number) - 1].push(message);
         }
@@ -102,6 +111,7 @@ void Repl::operator()() {
             }
 
             if (input.rfind("help", 0) == 0) {
+                this->file_logger->debug("User input help");
                 show_help();
             } else if (input.rfind("call", 0) == 0) {
                 call(input.substr(input.find_first_of("0123456789"), input.find(" ")), override);
@@ -116,6 +126,7 @@ void Repl::operator()() {
 
             }
         } else {
+            this->file_logger->debug("User input " + input + " no command");
             spdlog::warn("No Command: " + input);
             show_help();
         }        

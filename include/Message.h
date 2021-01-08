@@ -29,4 +29,7 @@ public:
 
     // get the elevator id
     unsigned int get_elevator_id();
+
+    // print the object
+    std::string to_string();
 };

@@ -44,6 +44,9 @@ void NextFloor_Queue::insert(unsigned int floor){
         }
     }
 
+    this->file_logger->debug("The queue decided to add the Floor " + to_string(floor) + " at the end of the queue. the queue size is " 
+                            + to_string(this->next_floors.size()));
+
     this->next_floors.push_back(floor);
     this->con_empty.notify_one();
 }

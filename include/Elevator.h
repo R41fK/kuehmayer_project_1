@@ -24,7 +24,7 @@ private:
 
 public:
     Elevator(unsigned int id, float travel_time, MessageQueue* coordinator_queue, std::shared_ptr<spdlog::logger> file_logger): 
-    id{id}, 
+    id{id},
     travel_time{travel_time},
     coordinator_queue{coordinator_queue},
     file_logger{file_logger}

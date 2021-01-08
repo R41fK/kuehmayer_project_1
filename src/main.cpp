@@ -149,6 +149,7 @@ int main(int argc, char* argv[]) {
     bool log_to_file{false};
     bool log_level_debug{false};
     bool use_simulation{false};
+    bool running{true};
     string config_file_json{};
     string config_file_toml{};
     string log_file{"control.log"};
@@ -257,7 +258,7 @@ int main(int argc, char* argv[]) {
 
     elevators.reserve(number_of_elevators);
     floors.reserve(floor_number);
-    thread_pool.reserve(floor_number+number_of_elevators*2+2);
+    thread_pool.reserve(floor_number+number_of_elevators*2+2+use_simulation);
 
     //print a little summary of the programm
 
@@ -305,6 +306,13 @@ int main(int argc, char* argv[]) {
     print_stars();
     cout << endl;
 
+
+    if (use_simulation) {
+        spdlog::info("To end the simulation, press enter");
+    } else {
+        spdlog::info("Type help to get a list of commands");
+    }
+
     //create all floor threads
 
     for (unsigned int i=1; i <= floor_number; i++) {
@@ -329,17 +337,18 @@ int main(int argc, char* argv[]) {
 
     //create the coordinator thread
 
-    thread tc{Coordinator{ref(elevators), coordinator_queue, file_logger}};
+    thread tc{Coordinator{ref(elevators), coordinator_queue, file_logger, ref(running)}};
     thread_pool.push_back(move(tc));
 
     //create the repl thread
     if (use_simulation) {
-        thread tr{Simulation{ref(floors), ref(elevators), override, file_logger, sim_time}};
-        thread_pool.push_back(move(tr));
-    } else {
-        thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger}};
+        thread tr{Simulation{ref(floors), ref(elevators), override, file_logger, sim_time, ref(running)}};
         thread_pool.push_back(move(tr));
     }
+
+    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger, use_simulation, ref(running)}};
+    thread_pool.push_back(move(tr));
+    
    
 
     //join all threads
@@ -347,6 +356,21 @@ int main(int argc, char* argv[]) {
     for (unsigned int i=0; i < thread_pool.size(); i++) {
         thread_pool[i].join();
     }
+
+    cout << endl;
+    print_stars();
+
+    cout << rang::fg::yellow
+         << rang::style::bold
+         << "elevator_control finished"
+         << rang::style::reset 
+         << rang::fg::reset 
+         << endl;
+
+    print_stars();
+    cout << endl;
+
+    file_logger->info("Finished elevator_control");
 
     delete coordinator_queue;
 }

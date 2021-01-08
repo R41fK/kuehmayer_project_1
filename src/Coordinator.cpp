@@ -72,43 +72,53 @@ unsigned int Coordinator::get_closest_elevator(Message message){
 void Coordinator::operator()() {
     future<void> send{};
 
-    while (1) {
+    while (this->running) {
         
         Message message{this->message_queue->pop()};
 
-        this->file_logger->debug("Coordinator got the " + message.to_string());
+        if (message.get_command() == "stop") {
+            this->running = false;
+            for (Elevator e : this->elevators) {
+                e.move_to(UINT_MAX);
+            }
+        } else {
 
-        //spdlog::info(this->name + ": " +  message.get_command());
-        send = async(launch::async, [&](){
-            if (message.get_command() == "override") {
-                if (message.get_elevator_id() == 0) {
+            this->file_logger->debug("Coordinator got the " + message.to_string());
+
+            //spdlog::info(this->name + ": " +  message.get_command());
+            send = async(launch::async, [&](){
+                if (message.get_command() == "override") {
+                    if (message.get_elevator_id() == 0) {
+                        unsigned int elevator_id{this->get_closest_elevator(message)};
+
+                        this->file_logger->debug("Coordinator got Override and tells Elevator " + to_string(elevator_id+1) 
+                                                + " to move to Floor " + to_string(message.get_floor())  + " without stopping");
+
+                        this->elevators[elevator_id].first(message.get_floor());
+                    } else {
+                        this->file_logger->debug("Coordinator got Override and tells Elevator " + to_string(message.get_elevator_id()) 
+                                                + " to move to Floor " + to_string(message.get_floor()) + " without stopping");
+
+                        this->elevators[message.get_elevator_id()-1].first(message.get_floor());
+                    }
+
+                } else if (message.get_command() == "move") {
+                    this->file_logger->debug("Coordinator tells Elevator " + to_string(message.get_elevator_id()) 
+                                            + " to move to Floor " + to_string(message.get_floor()));                
+
+                    this->elevators[message.get_elevator_id()-1].move_to(message.get_floor());
+
+                } else if (message.get_command() == "call") {
                     unsigned int elevator_id{this->get_closest_elevator(message)};
 
-                    this->file_logger->debug("Coordinator got Override and tells Elevator " + to_string(elevator_id+1) 
-                                            + " to move to Floor " + to_string(message.get_floor())  + " without stopping");
+                    this->file_logger->debug("Coordinator tells Elevator " + to_string(elevator_id+1) 
+                                            + " to move to Floor " + to_string(message.get_floor()));
 
-                    this->elevators[elevator_id].first(message.get_floor());
-                } else {
-                    this->file_logger->debug("Coordinator got Override and tells Elevator " + to_string(message.get_elevator_id()) 
-                                            + " to move to Floor " + to_string(message.get_floor()) + " without stopping");
-
-                    this->elevators[message.get_elevator_id()-1].first(message.get_floor());
+                    this->elevators[elevator_id].move_to(message.get_floor());
                 }
-
-            } else if (message.get_command() == "move") {
-                this->file_logger->debug("Coordinator tells Elevator " + to_string(message.get_elevator_id()) 
-                                        + " to move to Floor " + to_string(message.get_floor()));                
-
-                this->elevators[message.get_elevator_id()-1].move_to(message.get_floor());
-
-            } else if (message.get_command() == "call") {
-                unsigned int elevator_id{this->get_closest_elevator(message)};
-
-                this->file_logger->debug("Coordinator tells Elevator " + to_string(elevator_id+1) 
-                                        + " to move to Floor " + to_string(message.get_floor()));
-
-                this->elevators[elevator_id].move_to(message.get_floor());
-            }
-        });
+            });
+        }
     }
+
+    this->file_logger->debug("Stopped Coordinator");
 }

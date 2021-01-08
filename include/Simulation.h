@@ -14,6 +14,7 @@ private:
     std::vector<Floor>& floors;
     std::vector<Elevator>& elevators;
     bool override{false};
+    bool& running;
     std::shared_ptr<spdlog::logger> file_logger;
     float sim_time{};
 
@@ -22,12 +23,14 @@ private:
 
     // create a message for the command call and push it to the queue
     void call(std::string number, bool override);
-    
+
 public:
-    Simulation(std::vector<Floor>& floors, std::vector<Elevator>& elevators, bool override, std::shared_ptr<spdlog::logger> file_logger, float sim_time): 
+    Simulation(std::vector<Floor>& floors, std::vector<Elevator>& elevators, bool override
+              , std::shared_ptr<spdlog::logger> file_logger, float sim_time, bool& running): 
     floors{floors},
     elevators{elevators},
     override{override},
+    running{running},
     file_logger{file_logger},
     sim_time{sim_time}
     {};

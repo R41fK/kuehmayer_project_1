@@ -16,6 +16,7 @@ void Repl::show_help(){
     }
     spdlog::info("  CALL <floor_number>                    to simulate a button click in a floor, to call a elevator");
     spdlog::info("  MOVE <elevator_number> <floor_number>  to simulate a button click in a certain elevator, to move to a certain floor");
+    spdlog::info("  END                                    ends the program. The elevators will finish their queue");
 }
 
 
@@ -61,15 +62,39 @@ void Repl::move(string floor_number, string elevator_number, bool override) {
     }
 }
 
+void Repl::stop(){
+    this->running = false;
+
+    for (Elevator e : this->elevators) {
+        Message message{"Stop", "stop", 0, 0};
+        e.push(message);
+    }
+
+    for (Floor f : this->floors) {
+        Message message{"Stop", "stop", 0, 0};
+        f.push(message);
+    }
+}
+
 void Repl::operator()() {
 
-    spdlog::info("Type help to get a list of commands");
+    string input{};
+    bool override{false};
+
+    if (this->use_simulation) {
+        getline(cin, input);
+        stop();
+        spdlog::info("Stoped the Simulation. The elevator(s) are finishing there queue and than the program closes");
+        this->file_logger->info("User input to stop the program");
+        return;
+    }
+
 
     parser parser;
 
     if (this->override) {
         parser = (R"(
-            Start    <- 'help' / Call / Move / Override
+            Start    <- 'help' / Call / Move / Override / 'end'
             Override    <- 'override' Call / 'override' Move
             Call        <- 'call' Number
             Move        <- 'move' Number Number
@@ -78,19 +103,15 @@ void Repl::operator()() {
         )");
     } else {
         parser = (R"(
-            Start    <- 'help' / Call / Move
+            Start    <- 'help' / Call / Move / 'end'
             Call        <- 'call' Number
             Move        <- 'move' Number Number
             Number      <- < [0-9]+ >
             %whitespace <- [ \t]*
         )");
     }
-    
 
-    string input{};
-    bool override{false};
-
-     while (1) {
+    while (this->running) {
         
         getline(cin, input);
 
@@ -124,6 +145,10 @@ void Repl::operator()() {
 
                 move(input.substr(elevator_pos, elevator_pos_last - elevator_pos), input.substr(first_pos, last_pos - first_pos), override);
 
+            } else if (input.rfind("end", 0) == 0) {
+                stop();
+                spdlog::info("Stoped the Repl. The elevator(s) are finishing there queue and than the program closes");
+                this->file_logger->info("User input to stop the program");
             }
         } else {
             this->file_logger->debug("User input " + input + " no command");

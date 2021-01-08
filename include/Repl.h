@@ -16,6 +16,8 @@ private:
     unsigned int floor_number{};
     unsigned int elevator_number{};
     bool override{false};
+    bool use_simulation{false};
+    bool& running;
     std::shared_ptr<spdlog::logger> file_logger;
 
     // create a message for the command move and push it to the queue
@@ -27,14 +29,19 @@ private:
     // show the commands for the repl
     void show_help();
 
+    // stop all threads
+    void stop();
+
 public:
     Repl(std::vector<Floor>& floors, std::vector<Elevator>& elevators, unsigned int floor_number
-    , unsigned int elevator_number, bool override, std::shared_ptr<spdlog::logger> file_logger): 
+    , unsigned int elevator_number, bool override, std::shared_ptr<spdlog::logger> file_logger, bool use_simulation, bool& running): 
     floors{floors},
     elevators{elevators},
     floor_number{floor_number},
     elevator_number{elevator_number},
     override{override},
+    use_simulation{use_simulation},
+    running{running},
     file_logger{file_logger}
     {};
 

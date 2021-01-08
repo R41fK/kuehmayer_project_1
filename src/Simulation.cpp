@@ -47,7 +47,7 @@ void Simulation::operator()() {
     uniform_real_distribution<> rand_command{0, 10};
     bool override{false};
 
-    while (1) {
+    while (this->running) {
         if (int(rand_override(gen)) == 2 && this->override) {
             override = true;
         }
@@ -61,4 +61,6 @@ void Simulation::operator()() {
         override = false;
         this_thread::sleep_for(chrono::milliseconds(int(this->sim_time * 1000)));
     }
+
+    this->file_logger->debug("Stopped Simulation");
 }

@@ -14,6 +14,7 @@ private:
     MessageQueue* message_queue;
     MessageQueue* coordinator_queue;
     std::shared_ptr<spdlog::logger> file_logger;
+    bool running{true};
 
 public:
     Floor(unsigned int id, MessageQueue* coordinator_queue, std::shared_ptr<spdlog::logger> file_logger): 

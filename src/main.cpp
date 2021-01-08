@@ -13,6 +13,7 @@
 #include "Coordinator.h"
 #include "Elevator.h"
 #include "Repl.h"
+#include "Simulation.h"
 
 using namespace std;
 using namespace rang;
@@ -141,11 +142,13 @@ int main(int argc, char* argv[]) {
     CLI::App app("elevator_control");
 
     float travel_time{3.0};
+    float sim_time{5.0};
     unsigned int floor_number{3};
     unsigned int number_of_elevators{1};
     bool override{false};
     bool log_to_file{false};
     bool log_level_debug{false};
+    bool use_simulation{false};
     string config_file_json{};
     string config_file_toml{};
     string log_file{"control.log"};
@@ -197,6 +200,15 @@ int main(int argc, char* argv[]) {
                   , log_file
                   , "Define a file in that the logs are written"
                   , true)->needs(flag_l);
+
+    auto flag_s{app.add_flag("--simulation"
+                            , use_simulation
+                            , "Simulate user inputs. (Deactivtes user input)")};
+
+    app.add_option("--simulation-time"
+                  , sim_time
+                  , "The time the simulation waits until it simulates the next command"
+                  , true)->check(validate_float)->check(CLI::PositiveNumber)->needs(flag_s);
 
 
     CLI11_PARSE(app, argc, argv);
@@ -321,9 +333,14 @@ int main(int argc, char* argv[]) {
     thread_pool.push_back(move(tc));
 
     //create the repl thread
-
-    thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger}};
-    thread_pool.push_back(move(tr));
+    if (use_simulation) {
+        thread tr{Simulation{ref(floors), ref(elevators), override, file_logger, sim_time}};
+        thread_pool.push_back(move(tr));
+    } else {
+        thread tr{Repl{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger}};
+        thread_pool.push_back(move(tr));
+    }
+   
 
     //join all threads
 

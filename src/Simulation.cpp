@@ -12,11 +12,13 @@ void Simulation::call(unsigned int number, bool override) {
         
     if (override) {
         this->file_logger->debug("Simulation input override call " + to_string(number));
+        spdlog::info("Simulation input override call " + to_string(number));
 
         Message message{"Floor" + to_string(number), "override", number, 0};
         this->floors[number - 1].push(message);
     } else {
         this->file_logger->debug("Simulation input call " + to_string(number));
+        spdlog::info("Simulation input call " + to_string(number));
 
         Message message{"Floor" + to_string(number), "call", number, 0};
         this->floors[number - 1].push(message);
@@ -27,11 +29,13 @@ void Simulation::call(unsigned int number, bool override) {
 void Simulation::move(unsigned int floor_number, unsigned int elevator_number, bool override) {
     if (override) {
         this->file_logger->debug("Simulation input override move " + to_string(elevator_number) + " " + to_string(floor_number));
+        spdlog::info("Simulation input override move " + to_string(elevator_number) + " " + to_string(floor_number));
 
         Message message{"Elevator" + elevator_number, "override",  (floor_number), elevator_number};
         this->elevators[elevator_number - 1].push(message);
     } else {
         this->file_logger->debug("Simulation input move " + to_string(elevator_number) + " " + to_string(floor_number));
+        spdlog::info("Simulation input move " + to_string(elevator_number) + " " + to_string(floor_number));
 
         Message message{"Elevator" + to_string(elevator_number), "move", floor_number, elevator_number};
         this->elevators[elevator_number - 1].push(message);

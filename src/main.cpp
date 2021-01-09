@@ -16,7 +16,6 @@
 #include "Simulation.h"
 
 using namespace std;
-using namespace rang;
 using json = nlohmann::json;
 
 
@@ -37,7 +36,7 @@ string validate_int(const string& str) {
     size_t found{str.find_first_not_of("0123456789")};
 
     if (found <= str.length()) {
-        return str + " is not a int or not positive";
+        return str + " is not an unsigned int";
     } 
 
     return "";
@@ -60,12 +59,12 @@ json validate_json(const string& str) {
 
     if (j.contains("floor-number")) {
         if (validate_int(to_string(j["floor-number"])) != "" && j["floor-number"] <= 0) { //use of validate function to see if it is a integer or a float
-            cerr << "Floor-number musst be a unsigned integer greater than 0" << endl;
+            cerr << "Floor-number musst be an unsigned integer greater than 0" << endl;
             exit(0);
         }
     } else if (j.contains("elevators")) {
         if (validate_int(to_string(j["elevators"])) != "" && j["elevators"] <= 0) { //use of validate function to see if it is a integer or a float
-            cerr << "Elevators musst be a unsigned integer greater than 0 " << endl;
+            cerr << "Elevators musst be an unsigned integer greater than 0 " << endl;
             exit(0);
         }
     } else if (j.contains("seconds-between-floors")) {
@@ -173,19 +172,19 @@ int main(int argc, char* argv[]) {
 
     auto option_j{app.add_option("-j, --config-file-json"
                                 , config_file_json
-                                , "Get the configuration of the program from a JSON file. Overwrites other configurations"
+                                , "Get the configuration of the program from a JSON file."
                                 )->excludes(option_s)->excludes(option_f)->excludes(option_e)
                                 ->check(CLI::ExistingFile)};
 
     auto option_t{app.add_option("-t, --config-file-toml"
                                 , config_file_toml
-                                , "Get the configuration of the program from a JSON file. Overwrites other configurations"
+                                , "Get the configuration of the program from a TOML file."
                                 )->excludes(option_s)->excludes(option_f)->excludes(option_e)->excludes(option_j)
                                 ->check(CLI::ExistingFile)};
 
     app.add_flag("-o, --override"
                  ,override
-                 ,"Add a override option to the elevators")
+                 ,"Add an override option to the elevators")
                  ->excludes(option_j)->excludes(option_t);
 
     auto flag_l{app.add_flag("-l, --log-to-file"
@@ -342,7 +341,7 @@ int main(int argc, char* argv[]) {
 
     //create the repl thread
     if (use_simulation) {
-        thread tr{Simulation{ref(floors), ref(elevators), override, file_logger, sim_time, ref(running)}};
+        thread tr{Simulation{ref(floors), ref(elevators), floor_number, number_of_elevators, override, file_logger, sim_time, ref(running)}};
         thread_pool.push_back(move(tr));
     }
 

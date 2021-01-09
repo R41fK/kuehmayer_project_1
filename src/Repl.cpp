@@ -14,7 +14,7 @@ void Repl::show_help(){
     if (this->override) {
         spdlog::info("  OVERRIDE <CALL|MOVE>                   Oeverride a command. The Elevator will travel to the given floor without stopping. Can be used on call and move");
     }
-    spdlog::info("  CALL <floor_number>                    to simulate a button click in a floor, to call a elevator");
+    spdlog::info("  CALL <floor_number>                    to simulate a button click in a floor, to call an elevator");
     spdlog::info("  MOVE <elevator_number> <floor_number>  to simulate a button click in a certain elevator, to move to a certain floor");
     spdlog::info("  END                                    ends the program. The elevators will finish their queue");
 }

@@ -8,7 +8,7 @@ To simulate actions a REPL is built-in, with that the user can simulate button c
 In the CLI there are options to choose how much elevators and floors are simulated.
 There are also options for the travel time between the floors and if there the possibility of an override in the CLI.
 
-## Handling
+## Usage
 The programme is started by calling `./elevator_control` on the command line. 
 
 When called without parameters, the programme starts with 3 floors, 1 elevator and 3 seconds travel time.

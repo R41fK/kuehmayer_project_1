@@ -15,23 +15,23 @@ When called without parameters, the programme starts with 3 floors, 1 elevator a
 
 ## Parameter
 ### Programm parameters
-#### -s, --seconds-between-floors <positive float>
+#### -s, --seconds-between-floors \<positive float>
 change the travel time of an elevator between floors.
 
-#### -f, --floor-number <unsigned int>
+#### -f, --floor-number \<unsigned int>
 change the number of floors. 
 
-#### -e, --elevators <unsigned int>
+#### -e, --elevators \<unsigned int>
 change the number of elevators.
 
 #### -o, --override
-activate the override flag.
+activate the override flag, so that a command can be passed with the override flag and the elevator moves to this floor without stoping.
 
 ### Simulation parameters
 #### --simulation
 use a simulation instead of the REPL.
 
-#### --simulation-time <positive float>
+#### --simulation-time \<positive float>
 change the time the simulation waits, between commands.
 
 ### Config parameters
@@ -48,7 +48,7 @@ Activate logging into a file. Default logginglevel is info.
 #### -d, --log-level-debug
 Change the logginglevel to debug.
 
-#### --log-file <filepath>
+#### --log-file \<filepath>
 Change the logfile. (File must not exist)
 
 

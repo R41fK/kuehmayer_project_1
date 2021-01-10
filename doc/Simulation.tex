@@ -1,0 +1,32 @@
+\subsection{Simulation}
+
+\begin{lstlisting}[language=C++]
+class Simulation
+{
+private:
+    std::vector<Floor>& floors;
+    std::vector<Elevator>& elevators;
+    bool override{false};
+    bool& running;
+    std::shared_ptr<spdlog::logger> file_logger;
+    float sim_time{};
+    unsigned int floor_number{};
+    unsigned int elevator_number{};
+    void move(unsigned int floor_number
+    , unsigned int elevator_number, bool override);
+    void call(unsigned int number, bool override);
+
+public:
+    Simulation(std::vector<Floor>& floors
+    , std::vector<Elevator>& elevators
+    , unsigned int floor_number
+    , unsigned int elevator_number, bool override
+    , std::shared_ptr<spdlog::logger> file_logger
+    , float sim_time, bool& running);
+    void operator()();
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Die Simulation benötigt bei Initialisierung alle Stockwerke, alle Aufzüge, die Anzahl der Stockwerke, die Anzahl der Aufzüge, ob es override gibt oder nicht, den shared Pointer für das Logging in eine Datei, die Zeit zwischen den Kommandos und ob die Simulation beendet ist. Die Simulation wird mit der Methode operator als Thread gestartet. Es wird eine Schleife ausgeführt, die zufällig ein Kommando generiert, wenn override aktiv ist auch override Kommandos. Diese Kommandos werden dann mit den privaten Methoden move und call weiter bearbeitet. Wenn ein call Kommando mit einer Stockwerksnummer generiert wurde, wird die Methode call aufgerufen, um dieses Kommando in eine Nachricht zu verpacken und es an das dementsprechende Stockwerk zu schicken. Bei einem Move Kommando wird die Methode move aufgerufen, um dieses generierte Kommando in eine Nachricht zu verpacken und an den dementsprechenden Aufzug zu verschicken. Wird ein override Kommando, generiert wir einfach eine boolsche Variable auf true gesetzt und beide Methoden setzten dieses Kommando in die Nachricht ein. Die Simulation läuft solange, bis eine Anwendereingabe das Programm beendet. Das wird durch die boolsche Variable running realisiert, welche bei einer Anwendereingabe auf false gesetzt wird.

@@ -1,0 +1,27 @@
+\subsection{Aufzugsqueue}
+
+\begin{lstlisting}[language=C++]
+class NextFloor_Queue
+{
+private:
+    std::vector<unsigned int> next_floors{};
+    std::mutex m{};
+    std::condition_variable con_empty{};
+    std::shared_ptr<spdlog::logger> file_logger;
+
+public:
+    NextFloor_Queue
+        (std::shared_ptr<spdlog::logger> file_logger);
+    unsigned int front();
+    unsigned int get();
+    void erase(unsigned int floor);
+    void insert_first(unsigned int floor);
+    void insert(unsigned int floor);
+    bool empty();
+
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Die Aufzugsqueue bekommt bei der Initialisierung den shared Pointer für das Logging in Dateien und es wird ein Vector angelegt, welcher positive ganze Zahlen speichern kann. Um in diesen Vector etwas einfügen zu können, gibt es zwei öffentliche Methoden, insert\_first und insert. Beide Methoden benötigen als Parameter eine positive ganze Zahl. Der Unterschied dieser beiden Methoden ist das insert\_first den Parameter immer als Erstes einfügt. Wohingegen insert den Parametern nach seinem numerischen Wert einordnet. Um aus diesem Vector auch wieder etwas auslesen zu können, gibt es die Methoden first und get. Bei der Methode first wird der erste Wert des Vectors zurückgegeben und wenn keiner existiert 0. Bei get wird ebenfalls der erste Wert zurückgegeben, existiert aber kein wert, dann wird gewartet, bis einer eingefügt wird. Des Weiteren gibt es noch die Methode erase um einen Wert aus dem Vector zu löschen und die Methode empty die zurückgibt, ob der Vector leer ist oder nicht.

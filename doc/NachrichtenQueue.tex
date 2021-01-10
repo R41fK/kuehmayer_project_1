@@ -1,0 +1,19 @@
+\subsection{Nachrichtenqueue}
+
+\begin{lstlisting}[language=C++]
+class MessageQueue
+{
+private:
+    std::queue<Message> message_queue{};
+    std::mutex m{};
+    std::condition_variable empty{};
+    
+public:
+    Message pop();
+    void push(Message message);
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Die Nachrichtenqueue ist die direkte Kommunikationsverbindung zwischen den Aufzugsthreads, den Stockwerk Threads, dem Koordinator Thread und dem REPL Thread oder dem Simulationsthread. Bei der Initialisierung muss nichts übergeben werden. Des Weiteren enthält die Nachrichtenqueue eine Queue, welche Objekte vom Typ Nachricht speichern kann. Damit auf diese Queue zugegriffen werden kann, gibt es die öffentlichen Methoden pop und push. Bei der Methode pop wird die nächste Nachricht aus der Queue geholt, aus der Queue gelöscht und zurück übergeben. Ist keine Nachricht in der Queue vorhanden, wird gewartet, bis eine eingefügt wird. Mit push fügt man eine Nachricht in die Queue ein und benachrichtigt das wartende pop.

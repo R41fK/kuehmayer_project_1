@@ -1,0 +1,34 @@
+\subsection{REPL (Read–eval–print loop)}
+
+\begin{lstlisting}[language=C++]
+class Repl
+{
+private:
+    std::vector<Floor>& floors;
+    std::vector<Elevator>& elevators;
+    unsigned int floor_number{};
+    unsigned int elevator_number{};
+    bool override{false};
+    bool use_simulation{false};
+    bool& running;
+    std::shared_ptr<spdlog::logger> file_logger;
+    void move(std::string floor_number
+    , std::string elevator_number, bool override);
+    void call(std::string number, bool override);
+    void show_help();
+    void stop();
+
+public:
+    Repl(std::vector<Floor>& floors
+    , std::vector<Elevator>& elevators
+    , unsigned int floor_number
+    , unsigned int elevator_number, bool override
+    , std::shared_ptr<spdlog::logger> file_logger
+    , bool use_simulation, bool& running);
+    void operator()();
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Das REPL oder Read–eval–print loop ist eine Schleife, die Anwendereingaben list diese evaluiert, danach etwas ausgibt und das ganze in einer Schleife solange macht, bis der Anwender es abbricht oder das end Kommando eingibt. Bei der Initialisierung des REPLs werden alle Stockwerke, alle Aufzüge, die Anzahl der Stockwerke, die Anzahl der Aufzüge, ob override aktiv ist, der shared Pointer für das Logging in die Datei, ob die Simulation aktiv ist und ob das Programm läuft übergeben. Zuerst wird überprüft, ob eine Simulation läuft und wenn eine Simulation läuft, wird nur auf eine Eingabe gewartet, damit die Variable running auf false gesetzt werden kann uns somit die Simulation weiß, dass das Programm beendet wurde. Ist die Simulation jedoch nicht aktiv, wird zuerst die Grammatik für das REPL definiert. Dabei wird überprüft, ob Override aktiv ist. Ist es Aktiv wird es in die Grammatik eingebunden, ist es nicht aktiv, gilt die Eingabe eines Override Kommando als Fehler. Nachdem die Grammatik definiert ist, startet die Schleife. In dieser Schleife wird auf eine Eingabe des Anwenders gewartet. Ist eine Eingabe vorhanden, wird diese mit der Grammatik verglichen. Dadurch werden nicht vorhanden Kommandos ignoriert und es wird eine Information für den Anwender angezeigt, dass seine Eingabe keinem Kommando entspricht und welche Kommandos es gibt. Ist das Kommando jedoch als gültig erklärt worden, dann wird überprüft, um welches Kommando es sich handelt. Handelt es sich um das Kommando help, wird eine Infonachricht mit allen verfügbaren Kommandos ausgegeben. Handelt es sich um einen Override Kommando, wird eine lokale boolsche Variable auf true gesetzt und override wird aus dem string gelöscht, um in weiter zu überprüfen. Danach wird unterschieden zwischen einem call und einem move befehl. Bei einem Call befehl wird danach eine Zahl für die Stockwerksnummer angegeben, diese Muss von einem String zu einer ganzzahligen positiven Zahl konvertiert werden. Ist das erledigt, wird die Methode call aufgerufen. Diese Methode überprüft, ob es überhaupt soviel Stockwerke gibt, wie vom Anwender angegeben. Gibt es nicht so viele Stockwerke, wird eine Warnung ausgegeben mit der Anzahl der existierenden Stockwerke und der vom Anwender eingegebenen Anzahl. Ist die angegebene Zahl im Bereich des Möglichen, wird noch überprüft, ob override verwendet wurde, also dass die Variable true ist und dann die dementsprechende Nachricht an das dementsprechende Stockwerk geschickt. Ist es kein Call Kommando, sonder ein Move Kommando, müssen zwei Zahlen konvertiert werden und es wird die Methode move aufgerufen. Diese Methode überprüft ebenfalls, ob die eingegebene Zahl für das Stockwerk und die eingegebene Zahl für den Aufzug im Bereich des Möglichen sind. Sind sie es nicht, wird eine Warnung ausgegeben, mit wie viele Aufzüge oder Stockwerke es gibt und was ihre Eingabe war. Ist die Eingabe jedoch korrekt, wird überprüft, ob override verwendet wurde, also dass die Variable true ist und dann die dementsprechende Nachricht an den dementsprechenden Aufzug geschickt. Wird das Kommando end eingegeben, sendet das REPL an alle Aufzüge und an alle Stockwerke die Nachricht stop. Außerdem setzt es die Variable running auf flase und beendet somit die Schleife und den Thread.

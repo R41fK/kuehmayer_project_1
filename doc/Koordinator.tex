@@ -1,0 +1,23 @@
+\subsection{Koordinator}
+
+\begin{lstlisting}[language=C++]
+class Coordinator
+{
+private:
+    std::vector<Elevator>& elevators;
+    MessageQueue* message_queue;
+    std::string name{"Coordinator"};
+    std::shared_ptr<spdlog::logger> file_logger;
+    unsigned int get_closest_elevator(Message message);
+    
+public:
+    Coordinator(std::vector<Elevator>& elevators
+    , MessageQueue* message_queue
+    , std::shared_ptr<spdlog::logger> file_logger);
+    void operator()();
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Ein Koordinator bekommt bei der Initialisierung alle Aufzüge, seine Nachrichtenqueue und den shared Pointer für das Logging in eine Datei. Der Koordinator wird mit der Methode operator in einem Thread gestartet und wartet auf Nachrichten von einem Aufzug oder einem Stockwerk in seine Nachrichtenqueue. Wenn er eine Nachricht bekommt, muss er das Kommando auslesen. Ist das Kommando ein Override dann wird die boolsche Variable für override auf true gesetzt und danach aufgrund der Aufzugsid geschaut, ob ein Call Kommando oder ein Move Kommando mit Override aufgerufen wurde. Das kann dadurch erreicht werden, da bei einem Call die Aufzugsid immer 0 ist, es aber keinen Aufzug mit dieser ID gibt. Ist es ein Kommando ohne Override, dann kann die Art des Kommandos einfach ausgelesen werden. Ist es ein Move Kommando wird in die Aufzugqueue des Aufzuges, in welchem der Knopf gedrückt wurde, das Stockwerk eingefügt. Wenn es ein Override Kommando war mit der Methode first des Aufzuges ansonsten mit der Methode move\_to. Ist das Kommando jedoch kein Move, sondern ein Call, muss der Koordinator zuerst schauen, welcher Aufzug sich bewegt und welcher am nächsten ist. Das erfolgt durch die private Methode get\_closest\_elevator. Diese Methode ruft die statischen Methoden closest\_elevator\_not\_mooving und closest\_elevator\_with\_mooving auf. Diese Methoden werden asynchron in einem eigenen Thread gestartet und durch ein future-promis-paar wird das Ergebnis abgefragt. Es wird zuerst überprüft, ob sich ein Aufzug nicht bewegt, wenn das der Fall ist, wird der nächste sich nicht bewegende Aufzug ausgesucht. Bewegen sich jedoch alle Aufzüge, wird der Aufzug ausgesucht, der sich dem Stockwerk am nähesten befindet. Steht der Aufzug jetzt fest, so wird wie bei einem Move das Stockwerk in die Aufzugsqueue des Aufzuges eingefügt. Bei einem Override wieder mit der Methode first und wenn es kein override ist mit der Methode move\_to.

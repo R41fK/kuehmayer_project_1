@@ -336,7 +336,7 @@ int main(int argc, char* argv[]) {
 
     //create the coordinator thread
 
-    thread tc{Coordinator{ref(elevators), coordinator_queue, file_logger, ref(running)}};
+    thread tc{Coordinator{ref(elevators), coordinator_queue, file_logger}};
     thread_pool.push_back(move(tc));
 
     //create the repl thread

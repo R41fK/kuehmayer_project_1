@@ -1,0 +1,71 @@
+\documentclass[a4paper,12pt,titlepage]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlepic}
+
+\lstset{
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{green}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red} % string color
+}
+
+
+\title{NVS Projekt: Aufzugsteuerung}
+\author{Ralf Kühmayer}
+\date{January 2021}
+\titlepic{\includegraphics[width=60mm]{Elevator.pdf}}
+
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Aufgabenstellung}
+
+Ein kleines Beispiel für eine Aufzugssteuerung. Jedes Stockwerk und jeder Aufzug wird durch einen Thread repräsentiert. Es gibt einen zentralen Koordinator, der entscheidet, welcher Aufzug in welches Stockwerk fahren soll. In diesen Threads werden die in einem Aufzug oder einem Stockwerk gedrückten Knöpfe, um den Aufzug zu bewegen, vom Anwender simuliert. In der CLI gibt es Optionen, um auszuwählen, wie viele Aufzüge und Stockwerke simuliert werden. Es gibt auch Optionen für die Fahrzeit zwischen den Etagen und ob es die Möglichkeit eines Overrides in der CLI gibt. Des Weiteren kann in der CLI angegeben werden, dass eine Simulation anstelle des REPLs verwendet wird. Es gibt auch Optionen für logging und die Konfiguration kann auch durch eine JSON oder TOML Datei vorgenommen werden.
+
+
+\section{Verwendung}
+Das Programm wird durch den Aufruf von ./elevator\_control in der Kommandozeile gestartet. Beim Aufruf ohne Parameter startet das Programm mit 3 Stockwerken, 1 Aufzug und 3 Sekunden Fahrzeit zwischen den Stockwerken. Das Programm kann entweder durch die Eingabe des end Kommandos in das REPL beendet werden oder durch Abbruch mit Strg+c. Wird das Programm abgebrochen, wird es sofort geschlossen und die Aufzüge arbeiten ihre Queue nicht mehr ab. Wird das Programm jedoch mit dem end Kommando geschlossen, wartet das Programm noch solange, bis alle Aufzüge ihre Queue abgearbeitet haben, bevor es sich schließt.
+
+\input{Parameter}
+
+\break
+
+\section{Objekte}
+
+\input{Stockwerk}
+
+\break
+
+\input{Aufzug}
+
+\input{Koordinator}
+
+\input{REPL}
+
+\input{Simulation}
+
+\input{Aufzugsqueue}
+
+\input{NachrichtenQueue}
+
+\input{Nachricht}
+
+\section{Programmstart}
+
+Bei Programmstart werden zuerst alle Parameter überprüft und die dazu Angegebenen Werte des Benutzers. Ist irgend ein Wert nicht korrekt oder fehlerhaft, wird eine Info an den Benutzer ausgegeben und das Programm geschlossen. Danach wird überprüft, ob eine Konfigurationsdatei verwendet wird. Wird eine solche verwendet, wird diese validiert und die Werte werden übertragen. Ist die Datei jedoch nicht Valide, also sie weißt Fehler auf, wird ebenfalls eine Info an den Benutzer ausgegeben und das Programm beendet. Die nächste Überprüfung ist, ob das Loggen in eine Datei aktiviert wurde und welches Logginglevel verwendet werden soll. Dieser Logger wird erstellt und auf das Logginglevel konfiguriert. Des Weiteren wird das Pattern, mit welchem der Logger schreiben soll, für die Kommandozeilenausgabe genauso wie für das Logging in eine Datei konfiguriert. Der nächste Schritt ist das VeKtoren für die Stockwerke, die Aufzüge und die Threads erstellt werden. Diese Vektoren reservieren sich dann den Speicherplatz, den sie brauchen werden. Als Nächstes wird eine Ausgabe getätigt, welche den Status des Programmes ausgibt, also wie viele Aufzüge es gibt, ob Logging aktiviert ist und so weiter. Die nächste Überprüfung ist, ob der Benutzer die Simulation eingeschalten hat oder ob er das Programm per REPL bedienen will. Je nachdem wird eine Nachricht ausgegeben bei der Simulation, wie man sie beendet, beim REPL wie man die Hilfe aufruft. Als Nächstes werden die Threads für die Stockwerke, die Aufzugsbewegungen, die Aufzugsnachrichten, den Koordinator, das REPL und wenn aktiviert auch für die Simulation erstellt und gestartet. Mit dem Starten der Threads wird der Programmfluss an die Threads abgegeben und es wird nur noch gewartet, bis sich die Threads beenden. Nachdem alle Threads beendet sind, wird ausgegeben, dass das Programm sich beendet hat.
+
+\end{document}

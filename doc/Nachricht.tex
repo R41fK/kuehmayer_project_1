@@ -1,0 +1,25 @@
+\subsection{Nachricht}
+
+\begin{lstlisting}[language=C++]
+class Message
+{
+private:
+    std::string message{};
+    std::string command{};
+    unsigned int floor{};
+    unsigned int elevator_id{};
+    
+public:
+    Message(std::string message, std::string command
+    , unsigned int floor, unsigned int elevator_id);
+    std::string get_message();
+    std::string get_command();
+    unsigned int get_floor();
+    unsigned int get_elevator_id();
+    std::string to_string();
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Eine Nachricht wird verwendet, um zwischen den Stockwerken, den Aufzügen, dem Koordinator und dem REPL oder der Simulation eine einheitliche Kommunikationsbasis herzustellen. Beim Initialisieren einer Nachricht müssen eine Nachricht, ein Kommando, eine Stockwerknummer und eine Aufzugsid übergeben werden. Für jedes dieser Attribute gibt es eine Funktion, um ihren Wert Auslesen zu können.

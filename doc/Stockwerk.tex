@@ -1,0 +1,25 @@
+\subsection{Stockwerk}
+
+\begin{lstlisting}[language=C++]
+class Floor
+{
+private:
+    std::string name{"Floor"};
+    unsigned int id{};
+    MessageQueue* message_queue;
+    MessageQueue* coordinator_queue;
+    std::shared_ptr<spdlog::logger> file_logger;
+    bool running{true};
+
+public:
+    Floor(unsigned int id
+    , MessageQueue* coordinator_queue
+    , std::shared_ptr<spdlog::logger> file_logger);
+    void operator()();
+    void push(Message message);
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Das Stockwerk Objekt bekommt bei der Initialisierung eine ID, welche gleichzeitig die Nummer des Stockwerkes ist, die Nachrichtenqueue des Koordinators, um Nachrichten an den Koordinator zu schicken und einen shared Pointer für das Logging in eine Datei. Des Weiteren wird auch der Name auf Floor gesetzt. Mit dem Namen und der ID kann das Stockwerk eindeutig identifiziert werden. Des Weiteren hat ein Stockwerk auch einen eigene Nachrichtenqueue, in welche das Repl oder die Simulation Nachrichten stellen, welche von dem Stockwerk bearbeitet und an den Koordinator gesendet werden. Um diese Nachrichten in die Queue einzufügen, hat das Objekt eine öffentliche Methode push, welche eine Nachricht als Parameter benötigt. Die öffentliche Methode operator wird verwendet, um einen Thread für das Stockwerk zu starten. In dieser Methode wartet das Objekt auf eine Nachricht vom REPL oder der Simulation und wenn es eine Nachricht erhält, wird eine Ausgabe getätigt, die Nachricht verändert und an den Koordinator weiter gesendet. Die boolsche Variable running ist dafür da, dass der Thread so lange eine Schleife aufruft, um auf Nachrichten zu warten und sie weiter zu senden, bis eine Nachricht mit dem Befehl stop kommt. Dann wird diese Variable auf false gesetzt und der Thread schließt sich.

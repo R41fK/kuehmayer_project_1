@@ -59,10 +59,10 @@ unsigned int Coordinator::get_closest_elevator(Message message){
     if (closest >= this->elevators.size()) {
         closest = closest_with_mooving.get();
 
-        this->file_logger->info("Coordinator found no elevator that is not moving. Nearest that is mooving is elevator " + to_string(closest));
+        this->file_logger->info("Coordinator found no elevator that is not moving. Nearest that is mooving is elevator " + to_string(closest+1));
         
     } else {
-        this->file_logger->info("Coordinator found an elevator that is not moving. That elevator is elevator " + to_string(closest));
+        this->file_logger->info("Coordinator found an elevator that is not moving. That elevator is elevator " + to_string(closest+1));
     }
 
     return closest;
@@ -71,13 +71,14 @@ unsigned int Coordinator::get_closest_elevator(Message message){
 
 void Coordinator::operator()() {
     future<void> send{};
+    bool running{true};
 
-    while (this->running) {
+    while (running) {
         
         Message message{this->message_queue->pop()};
 
         if (message.get_command() == "stop") {
-            this->running = false;
+            running = false;
             for (Elevator e : this->elevators) {
                 e.move_to(UINT_MAX);
             }

@@ -52,7 +52,7 @@ void Simulation::operator()() {
     bool override{false};
 
     while (this->running) {
-        if (rand_override(gen) == 2 && this->override) {
+        if (this->override && rand_override(gen) == 2 ) {
             override = true;
         }
 

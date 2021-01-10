@@ -10,7 +10,6 @@
 class Repl
 {
 private:
-    std::string name{};
     std::vector<Floor>& floors;
     std::vector<Elevator>& elevators;
     unsigned int floor_number{};

@@ -1,0 +1,34 @@
+\subsection{Aufzug}
+
+
+\begin{lstlisting}[language=C++]
+Class Elevator
+{
+private:
+    std::string name{"Elevator"};
+    unsigned int id{1};
+    unsigned int current_floor{1};
+    bool moving{false};
+    float travel_time{3.0};
+    MessageQueue* message_queue;
+    MessageQueue* coordinator_queue;
+    NextFloor_Queue* next_floors;
+    std::shared_ptr<spdlog::logger> file_logger;
+
+public:
+    Elevator(unsigned int id, float travel_time
+    , MessageQueue* coordinator_queue
+    , std::shared_ptr<spdlog::logger> file_logger);
+    void move_to(unsigned int floor);
+    void first(unsigned int floor);
+    unsigned int get_current_floor();
+    bool is_moving();
+    void operator()();
+    void buttons();
+    void push(Message message);
+};
+\end{lstlisting}
+
+\vspace{5mm}
+
+Ein Aufzug bekommt bei der Initialisierung einen Namen, eine ID, in welchem Stock er sich gerade befindet, die Fahrzeit, die er zwischen zwei Stockwerken benötigt, die Koordinatorqueue, an welche er Nachrichten sendet und einen shared Pointer für das Logging in eine Datei. Durch den Namen und die ID kann jeder Aufzug eindeutig identifiziert werden. Des Weiteren erstellt er bei der Initialisierung eine Nachrichtenqueue, in welche mit der öffentlichen Methode push eine Nachricht eingefügt werden kann. Ebenfalls wird eine Aufzugsqueue erstellt, in diese Queue wird mit den öffentlichen Methoden first und move\_to etwas eingefügt, beide Methoden brauchen eine positive ganze Zahl als Parameter. Die Methode first wird nur dann aufgerufen, wenn ein Befehl mit einem Override Flag versehen wurde, dadurch werden alle Elemente, die gerade in der Aufzugsqueue sind, nach hinten verschoben und das übergebene Stockwerk wird an erster Stelle eingefügt. Bei der Methode move\_to wird zu erst überprüft, ob das Stockwerk zwischen dem Aktuellen und dem Nächsten liegt, dann wird es als Erstes in die Aufzugsqueue eingefügt, ansonsten wird es an die Queue übergeben, um es an einer passenden Stelle einzufügen. Diese beiden Methoden werden nur von dem Koordinator aufgerufen. Damit der Koordinator weiß, ob sich ein Aufzug gerade bewegt oder nicht, hat ein Aufzug die Methode is\_moving, welche true zurückgibt, wenn er sich bewegt, und wenn er gerade in einem Stockwerk steht, wird flase zurückgegeben. Aus einem Aufzugsobjekt werden zwei Threads erstellt. Der erste Thread ruft die Methode buttons auf.  Diese Methode wartet auf Nachrichten vom REPL oder der Simulation, bearbeitet diese und gibt sie an den Koordinator weiter. Dadurch wird das Drücken eines Knopfes in einem Aufzug simuliert. Diese Methode führt das warten, bearbeiten, senden so lange in einer Schleife aus, bis eine Nachricht mit dem Kommando stop erfolgt. Erfolgt diese Nachricht, sendet das Objekt die Nachricht mit dem stop Kommando weiter an den Koordinator und beendet sich danach. Die Methode operator hingegen simuliert die Bewegungen des Aufzuges. Es wird in einer Schleife überprüft, ob man das Ziel erreicht hat, ob es ein neues Ziel gibt oder ob überhaupt noch Ziele in der Queue sind. Hat der Aufzug sein Ziel erreicht, gibt er eine Nachricht aus und löscht dieses Element aus seiner Queue. Wenn sich nach dem Löschvorgang keine Ziele mehr in der Queue befinden, setzt er die Variable moving auf false. Jedes Mal, wenn ein Aufzug sein Ziel erreicht, wartet er auf diesem Stockwerk eine Sekunde, was das Ein- und Aussteigen von Personen simulieren soll. Danach wartet er, bis das nächste Ziel in der Queue ist. Ist die Queue noch nicht leer, holt er sich das nächste Ziel und überprüft, ob es dem Zeichen für stop entspricht. Entspricht es diesem Zeichen, beendet sich der Thread. Entspricht es jedoch nicht dem Zeichen, dann wird die Variable moving auf true gesetzt und der Aufzug fährt weiter. Es wird auch überprüft, ob sich das nächste Ziel in der Zwischenzeit geändert hat und falls es sich geändert hat, in der lokalen Variable die Änderung als neues Ziel gesetzt.

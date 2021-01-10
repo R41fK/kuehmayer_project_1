@@ -1,0 +1,49 @@
+\subsection{Parameter}
+Das Programm hat einige optionale Parameter, mit welchen der Anwender das Programm Konfigurieren, das Logging ändern und die Bedienung des Programmes verändern kann.
+
+
+\subsubsection{Programmparameter}
+Programmparameter sind Parameter, welche das Verhalten oder Anzahlen in dem Programm beeinflussen.
+
+\paragraph{-s, \texttt{-{}-}seconds-between-floors $<positive \: Kommazahl>$}\mbox{} \\
+Mit dem Parameter -s oder \texttt{-{}-}seconds-between-floors und einer positiven Kommazahl kann der Anwender einstellen, wie lange ein Aufzug von einem Stockwerk zum nächstgelegenen Stockwerk in Sekunden braucht. Wenn der Parameter nicht angegeben wird, ist standardmäßig eine Fahrzeit von 3 Sekunden zwischen den Stockwerken festgelegt.
+
+\paragraph{-f, \texttt{-{}-}floor-number $<positive \: ganze \: Zahl>$}\mbox{} \\
+Mit dem Parameter -f oder \texttt{-{}-}floor-number und einer positiven ganzen Zahl kann der Anwender einstellen, wie viele Stockwerke es gibt. Wenn der Parameter nicht angegeben wird, sind standardmäßig 3 Stockwerke vorhanden.
+
+\paragraph{-e, \texttt{-{}-}elevators $<positive \: ganze \: Zahl>$}\mbox{} \\
+Mit dem Parameter -e oder \texttt{-{}-}elevators und einer positiven ganzen Zahl, kann der Anwender einstellen, wie viele Aufzüge es gibt. Wenn der Parameter nicht angegeben wird, ist standardmäßig nur ein Aufzug vohanden.
+
+\paragraph{-o, \texttt{-{}-}override}\mbox{} \\
+Mit dem Parameter -o oder \texttt{-{}-}override, wird eingestellt, dass die Befehle Move und Call auch mit einem override Flag ausgeführt werden können. Wir ein Befehl mit einem Override ausgeführt, hat das zur Folge, dass der ausgewählte Aufzug das angegebene Stockwerk als nächstes anzusteuerndes Stockwerk in seine Queue einfügt.
+
+\subsubsection{Simmulationsparameter}
+Simulationsparameter sind Parameter, mit welchen man das REPL durch eine Simulation ersetzen kann und diese damit auch konfiguriert.
+
+\paragraph{\texttt{-{}-}simulation}\mbox{} \\
+Wird der Parameter \texttt{-{}-}simulation gesetzt, dann wird das REPL durch eine Simulation ersetzt. Der Anwender kann diese Simulation durch eine Eingabe der Entertaste beenden, jedoch werden alle Aufzüge ihre Queue noch leeren und dann nach wird das Programm geschlossen.
+
+\paragraph{\texttt{-{}-}simulation-time $<positive \: Kommazahl>$}\mbox{} \\
+Mit dem Parameter \texttt{-{}-}simulation-time und einer positiven Kommazahl kann der Anwender einstellen, wie lange es nach einem Befehl dauert, bis der nächste Befehl gesendet wird.
+
+\subsubsection{Konfigurationsparameter}
+Konfigurationsparameter sind Parameter, welche durch eine angegebene Konfigurationsdatei die Programmparameter ersetzen. Es dürfen nicht beide Konfigurationsparameter gleichzeitig verwendet werden. Immer nur einer ohne Programmparameter.
+
+\paragraph{-j, \texttt{-{}-}config-file-json $<Dateipfad>$}\mbox{} \\
+Mit dem Parameter -j oder \texttt{-{}-}config-file-json und dem Pfad zu der Konfigurationsdatei kann angegeben werden, dass das Programm mit einer JSON-Datei konfiguriert werden soll. Wird dieser Parameter angegeben, darf kein Programmparameter verwendet werden, Simulations- und Loggingparameter können verwendet werden.
+
+\paragraph{-t, \texttt{-{}-}config-file-toml $<Dateipfad>$}\mbox{} \\
+Mit dem Parameter -t oder \texttt{-{}-}config-file-toml und dem Pfad zu der Konfigurationsdatei kann angegeben werden, dass das Programm mit einer TOML-Datei konfiguriert werden soll. Wird dieser Parameter angegeben, darf kein Programmparameter verwendet werden, Simulations- und Loggingparameter können verwendet werden.
+
+
+\subsubsection{Loggingparameter}
+Mit den Loggingparametern wird das Logging in eine Datei aktiviert und es kann dieses konfiguriert werden. Standardmäßig ist das Logginglevel auf Info gesetzt, das kann jedoch genau so wie die Datei konfiguriert werden.
+
+\paragraph{-l, \texttt{-{}-}log-to-file}\mbox{} \\
+Mit dem Parameter -l oder \texttt{-{}-}log-to-file, kann der Anwender einstellen, dass das Logging in eine Datei aktiviert wird. Das default Logginglevel ist Info und es wird standardmäßig in die Datei control.log in dem aktuellen Ordner geschrieben. Existiert diese Datei nicht, wird sie erstellt.
+
+\paragraph{-d, \texttt{-{}-}log-level-debug}\mbox{} \\
+Mit dem Parameter -d oder \texttt{-{}-}log-level-debug wird das Logginglevel, für das Loggen in eine Datei vom Level Info auf das Level Debug geändert. Dadurch werden mehr Informationen in der Logdatei gespeichert.
+
+\paragraph{\texttt{-{}-}log-file $<Dateipfad>$}\mbox{} \\
+Mit dem Parameter \texttt{-{}-}log-file und dem Pfad zu einer Datei kann die Datei spezifiziert werden, in welche der Logger schreiben soll. Wenn diese Datei bereits existiert, hängt der Logger seine Nachrichten einfach am Ende der Datei an. Existiert die Datei jedoch nicht, wird eine neue Datei erstellt.

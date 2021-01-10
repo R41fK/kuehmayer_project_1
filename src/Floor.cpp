@@ -1,6 +1,3 @@
-#include <thread>
-#include <chrono>
-#include <iostream>
 #include <future>
 
 #include "spdlog/spdlog.h"

@@ -1,5 +1,4 @@
-#include <iostream>
-#include "future"
+#include <future>
 
 #include "spdlog/spdlog.h"
 #include "Coordinator.h"

@@ -1,6 +1,5 @@
 #include <thread>
 #include <chrono>
-#include <iostream>
 #include <stdlib.h>
 #include <future>
 

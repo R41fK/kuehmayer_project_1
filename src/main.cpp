@@ -83,7 +83,7 @@ json validate_json(const string& str) {
 }
 
 
-void use_toml_config(string config_file_toml, uint& floor_number, uint& number_of_elevators, float& travel_time, bool& override){
+void use_toml_config(string config_file_toml, uint& floor_number, uint& number_of_elevators, float& travel_time, bool& override) {
     try {
         toml::table t =  toml::parse_file(config_file_toml);
 
@@ -128,8 +128,8 @@ void use_toml_config(string config_file_toml, uint& floor_number, uint& number_o
 }
 
 
-void print_stars(){
-    for (int i=0; i < 143; i++){
+void print_stars() {
+    for (int i=0; i < 143; i++) {
         cout << "*";
     }
     cout << endl;
@@ -326,7 +326,7 @@ int main(int argc, char* argv[]) {
         elevators.insert(elevators.begin() + i - 1, Elevator{i, travel_time, coordinator_queue, file_logger});
         thread t{ref(elevators[i-1])};
         thread_pool.push_back(move(t));
-        thread t1{[&](){
+        thread t1{[&]() {
             elevators[i-1].buttons();
         }};
         thread_pool.push_back(move(t1));

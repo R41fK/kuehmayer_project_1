@@ -9,7 +9,7 @@
 using namespace std;
 using namespace peg;
 
-void Repl::show_help(){
+void Repl::show_help() {
     spdlog::info("Commands:");
     if (this->override) {
         spdlog::info("  OVERRIDE <CALL|MOVE>                   Oeverride a command. The Elevator will travel to the given floor without stopping. Can be used on call and move");
@@ -62,7 +62,7 @@ void Repl::move(string floor_number, string elevator_number, bool override) {
     }
 }
 
-void Repl::stop(){
+void Repl::stop() {
     this->running = false;
 
     for (Elevator e : this->elevators) {

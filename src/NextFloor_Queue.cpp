@@ -23,7 +23,7 @@ void NextFloor_Queue::erase(unsigned int pos) {
     this->next_floors.erase(find(this->next_floors.begin(), this->next_floors.end(), pos));
 }
 
-void NextFloor_Queue::insert_first(unsigned int floor){
+void NextFloor_Queue::insert_first(unsigned int floor) {
     lock_guard<mutex> lg{this->m};
     if (find(this->next_floors.begin(), this->next_floors.end(), floor) != this->next_floors.end()) {
         this->next_floors.erase(find(this->next_floors.begin(), this->next_floors.end(), floor));
@@ -32,13 +32,13 @@ void NextFloor_Queue::insert_first(unsigned int floor){
     this->con_empty.notify_one();
 }
 
-void NextFloor_Queue::insert(unsigned int floor){
+void NextFloor_Queue::insert(unsigned int floor) {
     lock_guard<mutex> lg{this->m};
     if (find(this->next_floors.begin(), this->next_floors.end(), floor) == this->next_floors.end()) {
         for (unsigned int i{1}; i < this->next_floors.size(); i++) {
             if ((this->next_floors[i-1] > floor && this->next_floors[i] <= floor)
             || (this->next_floors[i-1] < floor && this->next_floors[i] >= floor)
-            ){
+            ) {
                 this->file_logger->debug("The queue decided to add the Floor " + to_string(floor) + " on position " + to_string(i));
 
                 this->next_floors.insert(this->next_floors.begin() + i, floor);

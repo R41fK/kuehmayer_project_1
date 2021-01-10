@@ -7,7 +7,7 @@
 using namespace std;
 
 
-unsigned int closest_elevator_not_mooving(unsigned int floor, vector<Elevator>& elevators){
+unsigned int closest_elevator_not_mooving(unsigned int floor, vector<Elevator>& elevators) {
     unsigned int diff_closest_floor{UINT_MAX};
     unsigned int closest_elevator{UINT_MAX};
     unsigned int diff{};
@@ -18,7 +18,7 @@ unsigned int closest_elevator_not_mooving(unsigned int floor, vector<Elevator>& 
             diff_closest_floor = diff;
             closest_elevator = i;
 
-            if(diff_closest_floor == 0){
+            if(diff_closest_floor == 0) {
                 return closest_elevator;
             }
         }
@@ -27,7 +27,7 @@ unsigned int closest_elevator_not_mooving(unsigned int floor, vector<Elevator>& 
 }
 
 
-unsigned int closest_elevator_with_mooving(unsigned int floor, vector<Elevator>& elevators){
+unsigned int closest_elevator_with_mooving(unsigned int floor, vector<Elevator>& elevators) {
     unsigned int diff_closest_floor{UINT_MAX};
     unsigned int closest_elevator{UINT_MAX};
     unsigned int diff{};
@@ -38,7 +38,7 @@ unsigned int closest_elevator_with_mooving(unsigned int floor, vector<Elevator>&
             diff_closest_floor = diff;
             closest_elevator = i;
 
-            if(diff_closest_floor == 1){
+            if(diff_closest_floor == 1) {
                 return closest_elevator;
             }
         }
@@ -46,7 +46,7 @@ unsigned int closest_elevator_with_mooving(unsigned int floor, vector<Elevator>&
     return closest_elevator;
 }
 
-unsigned int Coordinator::get_closest_elevator(Message message){
+unsigned int Coordinator::get_closest_elevator(Message message) {
     unsigned int closest{};
 
     future<unsigned int> closest_not_mooving = async(launch::async, closest_elevator_not_mooving, message.get_floor(), ref(this->elevators));
@@ -86,7 +86,7 @@ void Coordinator::operator()() {
             this->file_logger->debug("Coordinator got the " + message.to_string());
 
             //spdlog::info(this->name + ": " +  message.get_command());
-            send = async(launch::async, [&](){
+            send = async(launch::async, [&]() {
                 if (message.get_command() == "override") {
                     if (message.get_elevator_id() == 0) {
                         unsigned int elevator_id{this->get_closest_elevator(message)};
